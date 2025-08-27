@@ -51,6 +51,7 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     logger.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
+    return;
   }
 });
 
@@ -95,6 +96,7 @@ router.post('/register', async (req, res) => {
   } catch (error) {
     logger.error('Registration error:', error);
     res.status(500).json({ error: 'Internal server error' });
+    return;
   }
 });
 
@@ -126,6 +128,7 @@ router.get('/me', async (req, res) => {
     res.json(user);
   } catch (error) {
     res.status(401).json({ error: 'Invalid token' });
+    return;
   }
 });
 
