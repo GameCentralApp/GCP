@@ -9,7 +9,8 @@
     "start": "node dist/index.js",
     "test": "jest",
     "migrate": "prisma migrate dev",
-    "generate": "prisma generate"
+    "generate": "prisma generate",
+    "setup:admin": "node dist/scripts/createAdmin.js"
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
