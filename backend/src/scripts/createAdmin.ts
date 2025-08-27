@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
@@ -41,4 +41,4 @@ if (require.main === module) {
   createAdmin();
 }
 
-export { createAdmin };
+module.exports = { createAdmin };

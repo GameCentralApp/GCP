@@ -1,22 +1,22 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import dotenv from 'dotenv';
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const dotenv = require('dotenv');
 
-import authRoutes from './routes/auth';
-import serverRoutes from './routes/servers';
-import userRoutes from './routes/users';
-import fileRoutes from './routes/files';
-import templateRoutes from './routes/templates';
-import settingsRoutes from './routes/settings';
+const authRoutes = require('./routes/auth');
+const serverRoutes = require('./routes/servers');
+const userRoutes = require('./routes/users');
+const fileRoutes = require('./routes/files');
+const templateRoutes = require('./routes/templates');
+const settingsRoutes = require('./routes/settings');
 
-import { authenticateToken } from './middleware/auth';
-import { setupDatabase } from './config/database';
-import { setupDocker } from './config/docker';
-import { initSocketHandlers } from './services/socket';
-import { logger } from './utils/logger';
+const { authenticateToken } = require('./middleware/auth');
+const { setupDatabase } = require('./config/database');
+const { setupDocker } = require('./config/docker');
+const { initSocketHandlers } = require('./services/socket');
+const { logger } = require('./utils/logger');
 
 dotenv.config();
 
@@ -80,4 +80,4 @@ async function startServer() {
 
 startServer();
 
-export { io };
+module.exports = { io };

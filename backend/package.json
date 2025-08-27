@@ -10,7 +10,7 @@
     "test": "jest",
     "migrate": "prisma migrate dev",
     "generate": "prisma generate",
-    "setup:admin": "ts-node src/scripts/createAdmin.ts",
+    "setup:admin": "npx ts-node --transpile-only src/scripts/createAdmin.ts",
     "setup:admin:built": "node dist/scripts/createAdmin.js"
   },
   "dependencies": {
