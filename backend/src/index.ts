@@ -36,8 +36,7 @@ app.use(helmet());
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL || "http://localhost:3000",
-    "http://31.97.117.108:3000",
-    "https://31.97.117.108:3000"
+    "http://31.97.117.108:3000"
   ],
   credentials: true
 }));
@@ -72,9 +71,10 @@ async function startServer() {
     await setupDatabase();
     await setupDocker();
     
-    server.listen(PORT, () => {
+    server.listen(PORT, '0.0.0.0', () => {
       logger.info(`GameHost Control Panel Backend running on port ${PORT}`);
       logger.info(`Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:3000"}`);
+      logger.info(`Server accessible at: http://31.97.117.108:${PORT}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
