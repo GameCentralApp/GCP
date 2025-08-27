@@ -3,13 +3,12 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
 
 const log = {
-  info: (msg) => console.log(chalk.blue('ℹ'), msg),
-  success: (msg) => console.log(chalk.green('✓'), msg),
-  error: (msg) => console.log(chalk.red('✗'), msg),
-  warn: (msg) => console.log(chalk.yellow('⚠'), msg),
+  info: (msg) => console.log('ℹ', msg),
+  success: (msg) => console.log('✓', msg),
+  error: (msg) => console.log('✗', msg),
+  warn: (msg) => console.log('⚠', msg),
 };
 
 function checkFile(filePath, description) {
@@ -95,7 +94,7 @@ function checkPorts() {
 }
 
 function main() {
-  console.log(chalk.cyan.bold('\n🔍 GameHost Control Panel - Setup Verification\n'));
+  console.log('\n🔍 GameHost Control Panel - Setup Verification\n');
 
   let allChecks = true;
 
@@ -153,14 +152,14 @@ function main() {
   console.log('\n' + '='.repeat(50));
   
   if (allChecks) {
-    console.log(chalk.green.bold('🎉 All checks passed! Your setup is ready.'));
+    console.log('🎉 All checks passed! Your setup is ready.');
     console.log('\nTo start the application:');
-    console.log(chalk.yellow('  Development: npm run dev'));
-    console.log(chalk.yellow('  Docker: docker-compose up -d'));
+    console.log('  Development: npm run dev');
+    console.log('  Docker: docker-compose up -d');
   } else {
-    console.log(chalk.red.bold('❌ Some checks failed. Please review the errors above.'));
+    console.log('❌ Some checks failed. Please review the errors above.');
     console.log('\nTo fix issues, try running:');
-    console.log(chalk.yellow('  npm run setup'));
+    console.log('  npm run setup');
   }
 
   return allChecks;

@@ -3,28 +3,27 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
-const ora = require('ora');
 
+// Simple logging without external dependencies
 const log = {
-  info: (msg) => console.log(chalk.blue('ℹ'), msg),
-  success: (msg) => console.log(chalk.green('✓'), msg),
-  error: (msg) => console.log(chalk.red('✗'), msg),
-  warn: (msg) => console.log(chalk.yellow('⚠'), msg),
+  info: (msg) => console.log('ℹ', msg),
+  success: (msg) => console.log('✓', msg),
+  error: (msg) => console.log('✗', msg),
+  warn: (msg) => console.log('⚠', msg),
 };
 
 function runCommand(command, description, cwd = process.cwd()) {
-  const spinner = ora(description).start();
+  console.log(`⏳ ${description}...`);
   try {
     execSync(command, { 
       cwd, 
       stdio: 'pipe',
       encoding: 'utf8'
     });
-    spinner.succeed(description);
+    log.success(description);
     return true;
   } catch (error) {
-    spinner.fail(`${description} - ${error.message}`);
+    log.error(`${description} - ${error.message}`);
     return false;
   }
 }
@@ -128,7 +127,7 @@ function setupDirectories() {
 }
 
 async function main() {
-  console.log(chalk.cyan.bold('\n🎮 GameHost Control Panel Setup\n'));
+  console.log('\n🎮 GameHost Control Panel Setup\n');
   
   // Check prerequisites
   if (!checkPrerequisites()) {
@@ -136,15 +135,17 @@ async function main() {
     process.exit(1);
   }
 
-  // Install dependencies
+  // Install root dependencies first (including ora and chalk)
   if (!runCommand('npm install', 'Installing root dependencies')) {
     process.exit(1);
   }
 
+  // Install frontend dependencies
   if (!runCommand('npm install', 'Installing frontend dependencies', 'frontend')) {
     process.exit(1);
   }
 
+  // Install backend dependencies
   if (!runCommand('npm install', 'Installing backend dependencies', 'backend')) {
     process.exit(1);
   }
@@ -165,7 +166,7 @@ async function main() {
   }
 
   // Create admin user
-  if (!runCommand('npm run setup:admin', 'Creating admin user', 'backend')) {
+  if (!runCommand('node -e "require(\'./dist/scripts/createAdmin.js\')" || npm run build && node dist/scripts/createAdmin.js', 'Creating admin user', 'backend')) {
     log.warn('Failed to create admin user automatically. You can create one manually later.');
   }
 
@@ -190,20 +191,20 @@ async function main() {
     }
   }
 
-  console.log(chalk.green.bold('\n🎉 Setup completed successfully!\n'));
+  console.log('\n🎉 Setup completed successfully!\n');
   
-  console.log(chalk.cyan('Next steps:'));
+  console.log('Next steps:');
   console.log('1. Start the development servers:');
-  console.log(chalk.yellow('   npm run dev'));
+  console.log('   npm run dev');
   console.log('\n2. Or start with Docker:');
-  console.log(chalk.yellow('   docker-compose up -d'));
+  console.log('   docker-compose up -d');
   console.log('\n3. Access the application:');
-  console.log(chalk.yellow('   Frontend: http://localhost:3000'));
-  console.log(chalk.yellow('   Backend API: http://localhost:5000'));
+  console.log('   Frontend: http://localhost:3000');
+  console.log('   Backend API: http://localhost:5000');
   console.log('\n4. Default admin credentials:');
-  console.log(chalk.yellow('   Username: admin'));
-  console.log(chalk.yellow('   Password: admin123'));
-  console.log(chalk.red('   ⚠️  Please change the default password after first login!'));
+  console.log('   Username: admin');
+  console.log('   Password: admin123');
+  console.log('   ⚠️  Please change the default password after first login!');
 }
 
 if (require.main === module) {
