@@ -171,11 +171,11 @@ async function main() {
   }
 
   // Build projects
-  if (!runCommand('npm run build', 'Building frontend', 'frontend')) {
+  if (!runCommand('npm run build', 'Building frontend', path.join(__dirname, '..', 'frontend'))) {
     log.warn('Frontend build failed. You can build it manually later.');
   }
 
-  if (!runCommand('npm run build', 'Building backend', 'backend')) {
+  if (!runCommand('npm run build', 'Building backend', path.join(__dirname, '..', 'backend'))) {
     log.warn('Backend build failed. You can build it manually later.');
   }
 
