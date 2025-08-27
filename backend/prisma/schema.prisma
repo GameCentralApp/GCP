@@ -82,7 +82,7 @@ model ApiKey {
   id          String   @id @default(cuid())
   name        String
   key         String   @unique
-  permissions String[] // JSON array of permissions
+  permissions String   // JSON string of permissions array
   lastUsed    DateTime?
   createdAt   DateTime @default(now())
   expiresAt   DateTime?
