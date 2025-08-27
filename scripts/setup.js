@@ -3,6 +3,8 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { promisify } = require('util');
+const rimraf = promisify(require('fs').rm || require('fs').rmdir);
 
 // Simple logging without external dependencies
 const log = {
@@ -55,6 +57,96 @@ function checkPrerequisites() {
   });
 
   return allPassed;
+}
+
+async function cleanupOldData() {
+  log.info('Cleaning up old data and services...');
+  
+  try {
+    // Stop and remove existing Docker containers
+    try {
+      const containers = execSync('docker ps -a --filter "name=gamehost" --format "{{.Names}}"', { 
+        encoding: 'utf8', 
+        stdio: 'pipe' 
+      }).trim().split('\n').filter(name => name);
+      
+      if (containers.length > 0) {
+        log.info(`Stopping and removing ${containers.length} existing containers...`);
+        containers.forEach(container => {
+          try {
+            execSync(`docker stop ${container}`, { stdio: 'pipe' });
+            execSync(`docker rm ${container}`, { stdio: 'pipe' });
+            log.success(`Removed container: ${container}`);
+          } catch (error) {
+            log.warn(`Failed to remove container ${container}: ${error.message}`);
+          }
+        });
+      }
+    } catch (error) {
+      log.info('No existing GameHost containers found');
+    }
+
+    // Remove Docker network if it exists
+    try {
+      execSync('docker network rm gamehost-network', { stdio: 'pipe' });
+      log.success('Removed existing Docker network');
+    } catch (error) {
+      log.info('No existing Docker network to remove');
+    }
+
+    // Clean up old data directories
+    const dirsToClean = [
+      'backend/data',
+      'backend/logs',
+      'backend/prisma/dev.db',
+      'backend/dist',
+      'frontend/dist',
+      'node_modules',
+      'frontend/node_modules',
+      'backend/node_modules'
+    ];
+
+    for (const dir of dirsToClean) {
+      const fullPath = path.join(__dirname, '..', dir);
+      if (fs.existsSync(fullPath)) {
+        try {
+          if (fs.statSync(fullPath).isDirectory()) {
+            await fs.promises.rm(fullPath, { recursive: true, force: true });
+            log.success(`Removed directory: ${dir}`);
+          } else {
+            await fs.promises.unlink(fullPath);
+            log.success(`Removed file: ${dir}`);
+          }
+        } catch (error) {
+          log.warn(`Failed to remove ${dir}: ${error.message}`);
+        }
+      }
+    }
+
+    // Clean package-lock files for fresh dependency resolution
+    const lockFiles = [
+      'package-lock.json',
+      'frontend/package-lock.json',
+      'backend/package-lock.json'
+    ];
+
+    lockFiles.forEach(lockFile => {
+      const fullPath = path.join(__dirname, '..', lockFile);
+      if (fs.existsSync(fullPath)) {
+        try {
+          fs.unlinkSync(fullPath);
+          log.success(`Removed lock file: ${lockFile}`);
+        } catch (error) {
+          log.warn(`Failed to remove ${lockFile}: ${error.message}`);
+        }
+      }
+    });
+
+    log.success('Cleanup completed successfully');
+  } catch (error) {
+    log.error('Cleanup failed:', error.message);
+    // Don't exit on cleanup failure, continue with setup
+  }
 }
 
 function createEnvFiles() {
@@ -128,6 +220,9 @@ function setupDirectories() {
 
 async function main() {
   console.log('\n🎮 GameHost Control Panel Setup\n');
+  
+  // Clean up old data and services first
+  await cleanupOldData();
   
   // Check prerequisites
   if (!checkPrerequisites()) {
@@ -205,6 +300,7 @@ async function main() {
   console.log('   Username: admin');
   console.log('   Password: admin123');
   console.log('   ⚠️  Please change the default password after first login!');
+  console.log('\n📝 Note: This was a fresh installation - all previous data has been removed.');
 }
 
 if (require.main === module) {
@@ -214,4 +310,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { main, checkPrerequisites, createEnvFiles, setupDirectories };
+module.exports = { main, checkPrerequisites, createEnvFiles, setupDirectories, cleanupOldData };
