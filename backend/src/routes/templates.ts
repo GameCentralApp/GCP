@@ -145,10 +145,10 @@ router.get('/', async (req, res) => {
       return res.json(templatesWithImages);
     }
 
-    res.json(templates);
+    return res.json(templates);
   } catch (error) {
     logger.error('Error fetching templates:', error);
-    res.status(500).json({ error: 'Failed to fetch templates' });
+    return res.status(500).json({ error: 'Failed to fetch templates' });
   }
 });
 
@@ -173,10 +173,10 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Template not found' });
     }
 
-    res.json(template);
+    return res.json(template);
   } catch (error) {
     logger.error('Error fetching template:', error);
-    res.status(500).json({ error: 'Failed to fetch template' });
+    return res.status(500).json({ error: 'Failed to fetch template' });
   }
 });
 

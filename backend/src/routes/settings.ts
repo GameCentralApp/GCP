@@ -16,21 +16,21 @@ router.get('/', requireAdmin, async (req, res) => {
       
       // Parse based on type
       if (setting.type === 'boolean') {
-        value = setting.value === 'true';
+        (value as any) = setting.value === 'true';
       } else if (setting.type === 'number') {
-        value = parseFloat(setting.value);
+        (value as any) = parseFloat(setting.value);
       } else if (setting.type === 'json') {
-        value = JSON.parse(setting.value);
+        (value as any) = JSON.parse(setting.value);
       }
       
       acc[setting.key] = value;
       return acc;
     }, {} as any);
 
-    res.json(settingsObj);
+    return res.json(settingsObj);
   } catch (error) {
     logger.error('Error fetching settings:', error);
-    res.status(500).json({ error: 'Failed to fetch settings' });
+    return res.status(500).json({ error: 'Failed to fetch settings' });
   }
 });
 

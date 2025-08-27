@@ -71,11 +71,11 @@ router.get('/:serverId', async (req, res) => {
 
       res.json({ files, currentPath: requestedPath });
     } catch (error) {
-      res.status(404).json({ error: 'Directory not found' });
+      return res.status(404).json({ error: 'Directory not found' });
     }
   } catch (error) {
     logger.error('Error listing files:', error);
-    res.status(500).json({ error: 'Failed to list files' });
+    return res.status(500).json({ error: 'Failed to list files' });
   }
 });
 
@@ -104,13 +104,13 @@ router.post('/:serverId/upload', upload.array('files'), async (req, res) => {
       path: file.path
     }));
 
-    res.json({ 
+    return res.json({ 
       message: 'Files uploaded successfully',
       files: uploadedFiles 
     });
   } catch (error) {
     logger.error('Error uploading files:', error);
-    res.status(500).json({ error: 'Failed to upload files' });
+    return res.status(500).json({ error: 'Failed to upload files' });
   }
 });
 
@@ -118,7 +118,7 @@ router.post('/:serverId/upload', upload.array('files'), async (req, res) => {
 router.get('/:serverId/download/*', async (req, res) => {
   try {
     const { serverId } = req.params;
-    const filePath = req.params[0];
+    const filePath = (req.params as any)[0];
     const user = (req as any).user;
 
     // Verify access
@@ -153,11 +153,11 @@ router.get('/:serverId/download/*', async (req, res) => {
       await archive.finalize();
     } else {
       // Send file directly
-      res.download(fullPath);
+      return res.download(fullPath);
     }
   } catch (error) {
     logger.error('Error downloading file:', error);
-    res.status(500).json({ error: 'Failed to download file' });
+    return res.status(500).json({ error: 'Failed to download file' });
   }
 });
 
@@ -165,7 +165,7 @@ router.get('/:serverId/download/*', async (req, res) => {
 router.delete('/:serverId/*', async (req, res) => {
   try {
     const { serverId } = req.params;
-    const filePath = req.params[0];
+    const filePath = (req.params as any)[0];
     const user = (req as any).user;
 
     // Verify access
@@ -196,10 +196,10 @@ router.delete('/:serverId/*', async (req, res) => {
       await fs.unlink(fullPath);
     }
 
-    res.json({ message: 'Item deleted successfully' });
+    return res.json({ message: 'Item deleted successfully' });
   } catch (error) {
     logger.error('Error deleting file:', error);
-    res.status(500).json({ error: 'Failed to delete item' });
+    return res.status(500).json({ error: 'Failed to delete item' });
   }
 });
 
