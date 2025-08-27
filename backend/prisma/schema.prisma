@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      String   @default("user") // admin, user, viewer
+  status    String   @default("offline") // online, offline
+  createdAt DateTime @default(now())
+  lastActive DateTime @default(now())
+
+  servers Server[]
+  backups Backup[]
+  apiKeys ApiKey[]
+
+  @@map("users")
+}
+
+model Server {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  game        String
+  template    String
+  port        Int      @unique
+  memory      Int      // MB
+  cpu         Int      // Percentage limit
+  disk        Int      @default(1024) // MB
+  status      String   @default("offline")
+  containerId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  backups Backup[]
+  logs    ServerLog[]
+
+  @@map("servers")
+}
+
+model Backup {
+  id        String   @id @default(cuid())
+  name      String
+  path      String
+  size      Int      // Bytes
+  type      String   @default("manual") // manual, scheduled
+  status    String   @default("pending") // pending, completed, failed
+  createdAt DateTime @default(now())
+
+  serverId String
+  server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("backups")
+}
+
+model ServerLog {
+  id        String   @id @default(cuid())
+  level     String   // info, warn, error
+  message   String
+  timestamp DateTime @default(now())
+
+  serverId String
+  server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@map("server_logs")
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  name        String
+  key         String   @unique
+  permissions String[] // JSON array of permissions
+  lastUsed    DateTime?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  type  String @default("string") // string, number, boolean, json
+
+  @@map("settings")
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  game        String
+  version     String
+  category    String
+  image       String   // Docker image
+  config      String   // JSON configuration
+  isPublic    Boolean  @default(true)
+  downloads   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("templates")
+}

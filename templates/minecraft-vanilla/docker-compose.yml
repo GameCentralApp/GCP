@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  minecraft:
+    image: itzg/minecraft-server:latest
+    environment:
+      - EULA=TRUE
+      - TYPE=VANILLA
+      - VERSION=1.20.4
+      - MEMORY=2G
+      - MAX_PLAYERS=20
+      - DIFFICULTY=normal
+      - GAMEMODE=survival
+      - PVP=true
+      - SPAWN_PROTECTION=16
+      - VIEW_DISTANCE=10
+    ports:
+      - "${SERVER_PORT:-25565}:25565"
+    volumes:
+      - minecraft_data:/data
+    restart: unless-stopped
+    networks:
+      - gamehost-network
+
+volumes:
+  minecraft_data:
+
+networks:
+  gamehost-network:
+    external: true

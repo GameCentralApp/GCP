@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  csgo:
+    image: cm2network/csgo:latest
+    environment:
+      - SRCDS_TOKEN=${SRCDS_TOKEN:-}
+      - SRCDS_RCONPW=${RCON_PASSWORD:-gamehost123}
+      - SRCDS_PW=${SERVER_PASSWORD:-}
+      - SRCDS_FPSMAX=300
+      - SRCDS_TICKRATE=128
+      - SRCDS_MAXPLAYERS=${MAX_PLAYERS:-20}
+      - SRCDS_STARTMAP=de_dust2
+      - SRCDS_REGION=3
+      - SRCDS_MAPGROUP=mg_active
+      - SRCDS_GAMETYPE=0
+      - SRCDS_GAMEMODE=1
+    ports:
+      - "${SERVER_PORT:-27015}:27015/tcp"
+      - "${SERVER_PORT:-27015}:27015/udp"
+    volumes:
+      - csgo_data:/home/steam/csgo-dedicated
+    restart: unless-stopped
+    networks:
+      - gamehost-network
+
+volumes:
+  csgo_data:
+
+networks:
+  gamehost-network:
+    external: true
