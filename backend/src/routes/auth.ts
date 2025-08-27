@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
       data: { lastActive: new Date() }
     });
 
-    res.json({
+    return res.json({
       token,
       user: {
         id: user.id,
@@ -83,7 +83,7 @@ router.post('/register', async (req, res) => {
       }
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'User created successfully',
       user: {
         id: user.id,
@@ -123,7 +123,7 @@ router.get('/me', async (req, res) => {
       return res.status(401).json({ error: 'User not found' });
     }
 
-    res.json(user);
+    return res.json(user);
   } catch (error) {
     return res.status(401).json({ error: 'Invalid token' });
   }
