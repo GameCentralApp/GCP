@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://31.97.117.108:5000';
 
 export const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
@@ -16,7 +16,7 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  console.log('API Request:', config.method?.toUpperCase(), config.url);
+  console.log('API Request:', config.method?.toUpperCase(), config.url, 'to', config.baseURL);
   return config;
 });
 
