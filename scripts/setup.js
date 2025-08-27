@@ -63,6 +63,78 @@ async function cleanupOldData() {
   log.info('Cleaning up old data and services...');
   
   try {
+    // Stop any running development servers and processes
+    log.info('Stopping old development services...');
+    
+    // Kill nodemon processes
+    try {
+      execSync('pkill -f nodemon', { stdio: 'pipe' });
+      log.success('Stopped nodemon processes');
+    } catch (error) {
+      log.info('No nodemon processes found');
+    }
+    
+    // Kill Vite dev server processes
+    try {
+      execSync('pkill -f "vite.*dev"', { stdio: 'pipe' });
+      log.success('Stopped Vite dev server processes');
+    } catch (error) {
+      log.info('No Vite dev server processes found');
+    }
+    
+    // Kill any processes using ports 3000 and 5000
+    const ports = [3000, 5000];
+    ports.forEach(port => {
+      try {
+        const result = execSync(`lsof -ti:${port}`, { encoding: 'utf8', stdio: 'pipe' }).trim();
+        if (result) {
+          const pids = result.split('\n').filter(pid => pid);
+          pids.forEach(pid => {
+            try {
+              execSync(`kill -9 ${pid}`, { stdio: 'pipe' });
+              log.success(`Killed process ${pid} using port ${port}`);
+            } catch (error) {
+              log.warn(`Failed to kill process ${pid}: ${error.message}`);
+            }
+          });
+        }
+      } catch (error) {
+        log.info(`No processes found using port ${port}`);
+      }
+    });
+    
+    // Stop Prisma Studio if running
+    try {
+      execSync('pkill -f "prisma studio"', { stdio: 'pipe' });
+      log.success('Stopped Prisma Studio processes');
+    } catch (error) {
+      log.info('No Prisma Studio processes found');
+    }
+    
+    // Kill any ts-node processes
+    try {
+      execSync('pkill -f ts-node', { stdio: 'pipe' });
+      log.success('Stopped ts-node processes');
+    } catch (error) {
+      log.info('No ts-node processes found');
+    }
+    
+    // Kill any npm run dev processes
+    try {
+      execSync('pkill -f "npm run dev"', { stdio: 'pipe' });
+      log.success('Stopped npm run dev processes');
+    } catch (error) {
+      log.info('No npm run dev processes found');
+    }
+    
+    // Kill concurrently processes
+    try {
+      execSync('pkill -f concurrently', { stdio: 'pipe' });
+      log.success('Stopped concurrently processes');
+    } catch (error) {
+      log.info('No concurrently processes found');
+    }
+
     // Stop and remove existing Docker containers
     try {
       const containers = execSync('docker ps -a --filter "name=gamehost" --format "{{.Names}}"', { 
