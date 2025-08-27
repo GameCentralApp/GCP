@@ -50,8 +50,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     logger.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-    return;
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -95,8 +94,7 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     logger.error('Registration error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-    return;
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -127,8 +125,7 @@ router.get('/me', async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    res.status(401).json({ error: 'Invalid token' });
-    return;
+    return res.status(401).json({ error: 'Invalid token' });
   }
 });
 
