@@ -6,6 +6,9 @@ import App from './App';
 import './index.css';
 import { AuthProvider } from './contexts/AuthContext';
 
+console.log('Frontend starting...');
+console.log('API URL:', import.meta.env.VITE_API_URL);
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>

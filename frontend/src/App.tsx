@@ -15,14 +15,19 @@ import LoadingScreen from './components/UI/LoadingScreen';
 function App() {
   const { isLoading, user } = useAuth();
 
+  console.log('App render - isLoading:', isLoading, 'user:', user);
+
   if (isLoading) {
+    console.log('Showing loading screen');
     return <LoadingScreen />;
   }
 
   if (!user) {
+    console.log('No user, showing login');
     return <Login />;
   }
 
+  console.log('User authenticated, showing main app');
   return (
     <Layout>
       <Routes>
