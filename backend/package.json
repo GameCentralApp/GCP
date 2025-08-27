@@ -10,7 +10,8 @@
     "test": "jest",
     "migrate": "prisma migrate dev",
     "generate": "prisma generate",
-    "setup:admin": "node dist/scripts/createAdmin.js"
+    "setup:admin": "ts-node src/scripts/createAdmin.ts",
+    "setup:admin:built": "node dist/scripts/createAdmin.js"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

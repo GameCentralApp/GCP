@@ -166,7 +166,7 @@ async function main() {
   }
 
   // Create admin user
-  if (!runCommand('node -e "require(\'./dist/scripts/createAdmin.js\')" || npm run build && node dist/scripts/createAdmin.js', 'Creating admin user', 'backend')) {
+  if (!runCommand('npm run setup:admin', 'Creating admin user', 'backend')) {
     log.warn('Failed to create admin user automatically. You can create one manually later.');
   }
 
