@@ -9,7 +9,7 @@ Get your first game server running in under 5 minutes with our automated setup:
 ```bash
 # Clone and setup
 git clone https://github.com/GameCentralApp/GCP.git
-cd gamehost-control-panel
+cd GCP
 
 # One-command setup (installs everything and configures the system)
 npm run setup
