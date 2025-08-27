@@ -5,12 +5,12 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const dotenv = require('dotenv');
 
-const authRoutes = require('./routes/auth');
-const serverRoutes = require('./routes/servers');
-const userRoutes = require('./routes/users');
-const fileRoutes = require('./routes/files');
-const templateRoutes = require('./routes/templates');
-const settingsRoutes = require('./routes/settings');
+const authRoutes = require('./routes/auth').default || require('./routes/auth');
+const serverRoutes = require('./routes/servers').default || require('./routes/servers');
+const userRoutes = require('./routes/users').default || require('./routes/users');
+const fileRoutes = require('./routes/files').default || require('./routes/files');
+const templateRoutes = require('./routes/templates').default || require('./routes/templates');
+const settingsRoutes = require('./routes/settings').default || require('./routes/settings');
 
 const { authenticateToken } = require('./middleware/auth');
 const { setupDatabase } = require('./config/database');
