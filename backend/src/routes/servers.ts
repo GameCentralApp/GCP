@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
     res.json(serversWithStatus);
   } catch (error) {
     logger.error('Error fetching servers:', error);
-    res.status(500).json({ error: 'Failed to fetch servers' });
+    return res.status(500).json({ error: 'Failed to fetch servers' });
   }
 });
 
@@ -86,10 +86,10 @@ router.post('/', async (req, res) => {
       data: { containerId }
     });
 
-    res.status(201).json(updatedServer);
+    return res.status(201).json(updatedServer);
   } catch (error) {
     logger.error('Error creating server:', error);
-    res.status(500).json({ error: 'Failed to create server' });
+    return res.status(500).json({ error: 'Failed to create server' });
   }
 });
 
@@ -128,14 +128,14 @@ router.get('/:id', async (req, res) => {
       }
     }
 
-    res.json({
+    return res.json({
       ...server,
       status: containerStatus,
       resources
     });
   } catch (error) {
     logger.error('Error fetching server:', error);
-    res.status(500).json({ error: 'Failed to fetch server' });
+    return res.status(500).json({ error: 'Failed to fetch server' });
   }
 });
 
@@ -163,10 +163,10 @@ router.post('/:id/start', async (req, res) => {
       data: { status: 'starting' }
     });
 
-    res.json({ message: 'Server start initiated' });
+    return res.json({ message: 'Server start initiated' });
   } catch (error) {
     logger.error('Error starting server:', error);
-    res.status(500).json({ error: 'Failed to start server' });
+    return res.status(500).json({ error: 'Failed to start server' });
   }
 });
 
@@ -194,10 +194,10 @@ router.post('/:id/stop', async (req, res) => {
       data: { status: 'stopping' }
     });
 
-    res.json({ message: 'Server stop initiated' });
+    return res.json({ message: 'Server stop initiated' });
   } catch (error) {
     logger.error('Error stopping server:', error);
-    res.status(500).json({ error: 'Failed to stop server' });
+    return res.status(500).json({ error: 'Failed to stop server' });
   }
 });
 
@@ -225,10 +225,10 @@ router.post('/:id/restart', async (req, res) => {
       data: { status: 'restarting' }
     });
 
-    res.json({ message: 'Server restart initiated' });
+    return res.json({ message: 'Server restart initiated' });
   } catch (error) {
     logger.error('Error restarting server:', error);
-    res.status(500).json({ error: 'Failed to restart server' });
+    return res.status(500).json({ error: 'Failed to restart server' });
   }
 });
 
@@ -257,10 +257,10 @@ router.delete('/:id', async (req, res) => {
     // Delete server record
     await prisma.server.delete({ where: { id } });
 
-    res.json({ message: 'Server deleted successfully' });
+    return res.json({ message: 'Server deleted successfully' });
   } catch (error) {
     logger.error('Error deleting server:', error);
-    res.status(500).json({ error: 'Failed to delete server' });
+    return res.status(500).json({ error: 'Failed to delete server' });
   }
 });
 
