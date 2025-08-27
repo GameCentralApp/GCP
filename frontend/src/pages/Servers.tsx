@@ -155,7 +155,9 @@ const Servers: React.FC = () => {
 
       {filteredServers.length === 0 && (
         <div className="text-center py-12">
-          <Server className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+          <div className="h-16 w-16 text-gray-500 mx-auto mb-4 flex items-center justify-center">
+            <Server className="h-16 w-16" />
+          </div>
           <h3 className="text-xl font-medium text-white mb-2">No servers found</h3>
           <p className="text-gray-400 mb-6">
             {searchTerm || statusFilter !== 'all' 

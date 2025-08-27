@@ -33,9 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const response = await api.get('/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/auth/me');
       setUser(response.data);
     } catch (error) {
       localStorage.removeItem('token');

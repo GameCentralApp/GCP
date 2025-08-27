@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Monitor, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import clsx from 'clsx';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');

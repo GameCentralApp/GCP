@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Save, RefreshCw, Shield, Database, Mail, Bell } from 'lucide-react';
+import clsx from 'clsx';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
