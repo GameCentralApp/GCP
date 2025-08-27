@@ -1,4 +1,5 @@
 const express = require('express');
+const { Request, Response, NextFunction } = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const { createServer } = require('http');
@@ -49,7 +50,7 @@ app.use('/api/templates', authenticateToken, templateRoutes);
 app.use('/api/settings', authenticateToken, settingsRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (req: typeof Request, res: typeof Response) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
@@ -57,7 +58,7 @@ app.get('/health', (req, res) => {
 initSocketHandlers(io);
 
 // Error handling
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: typeof Request, res: typeof Response, next: typeof NextFunction) => {
   logger.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });

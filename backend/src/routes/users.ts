@@ -70,10 +70,10 @@ router.post('/', requireAdmin, async (req, res) => {
       }
     });
 
-    res.status(201).json(user);
+    return res.status(201).json(user);
   } catch (error) {
     logger.error('Error creating user:', error);
-    res.status(500).json({ error: 'Failed to create user' });
+    return res.status(500).json({ error: 'Failed to create user' });
   }
 });
 
@@ -122,10 +122,10 @@ router.delete('/:id', requireAdmin, async (req, res) => {
 
     await prisma.user.delete({ where: { id } });
 
-    res.json({ message: 'User deleted successfully' });
+    return res.json({ message: 'User deleted successfully' });
   } catch (error) {
     logger.error('Error deleting user:', error);
-    res.status(500).json({ error: 'Failed to delete user' });
+    return res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 
