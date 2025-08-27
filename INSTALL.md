@@ -5,7 +5,7 @@
 The fastest and most reliable way to install GameHost Control Panel:
 
 ```bash
-git clone https://github.com/gamehost/control-panel.git
+git clone https://github.com/GameCentralApp/GCP.git
 cd gamehost-control-panel
 npm run setup
 ```
