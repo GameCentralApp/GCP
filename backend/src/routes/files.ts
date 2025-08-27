@@ -69,7 +69,7 @@ router.get('/:serverId', async (req, res) => {
         };
       }));
 
-      res.json({ files, currentPath: requestedPath });
+      return res.json({ files, currentPath: requestedPath });
     } catch (error) {
       return res.status(404).json({ error: 'Directory not found' });
     }
