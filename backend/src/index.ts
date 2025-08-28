@@ -14,7 +14,7 @@ const app = express();
 const prisma = new PrismaClient({
   log: ['error'], // Only log errors in production
 });
-const PORT = parseInt(process.env.PORT || '5000', 10);
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
 // Middleware
 app.use(compression()); // Enable gzip compression
@@ -219,6 +219,78 @@ app.get('/api/servers', authenticateToken, async (req: Request, res: Response) =
   } catch (error) {
     log(`Servers error: ${error}`);
     return res.status(500).json({ error: 'Failed to fetch servers' });
+  }
+});
+
+// Basic templates endpoint
+app.get('/api/templates', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    log(`Templates requested by user: ${(req as any).user.username}`);
+    
+    const templates = [
+      {
+        id: 'minecraft-vanilla',
+        name: 'Minecraft Vanilla',
+        description: 'Official Minecraft server with no modifications',
+        game: 'Minecraft',
+        version: '1.20.4',
+        category: 'vanilla',
+        downloads: 2847,
+        rating: 4.8,
+        image: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=400',
+        requirements: { cpu: '2 cores', memory: '2GB', disk: '1GB' },
+        features: ['Easy setup', 'Auto-updates', 'Backup support']
+      },
+      {
+        id: 'csgo-competitive',
+        name: 'CS:GO Competitive',
+        description: 'Counter-Strike: Global Offensive competitive server setup',
+        game: 'CS:GO',
+        version: 'Latest',
+        category: 'fps',
+        downloads: 3421,
+        rating: 4.9,
+        image: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg?auto=compress&cs=tinysrgb&w=400',
+        requirements: { cpu: '2 cores', memory: '1GB', disk: '500MB' },
+        features: ['Anti-cheat included', 'Demo recording', 'Tournament ready']
+      }
+    ];
+
+    res.setHeader('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+    return res.json(templates);
+  } catch (error) {
+    log(`Templates error: ${error}`);
+    return res.status(500).json({ error: 'Failed to fetch templates' });
+  }
+});
+
+// Basic users endpoint (admin only)
+app.get('/api/users', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    
+    if (user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    log(`Users requested by admin: ${user.username}`);
+    
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        status: true,
+        lastActive: true,
+        createdAt: true
+      }
+    });
+
+    return res.json(users);
+  } catch (error) {
+    log(`Users error: ${error}`);
+    return res.status(500).json({ error: 'Failed to fetch users' });
   }
 });
 
