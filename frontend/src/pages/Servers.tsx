@@ -1,50 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, RefreshCw } from 'lucide-react';
 import ServerCard from '../components/UI/ServerCard';
+import { api } from '../services/api';
 import toast from 'react-hot-toast';
 
 const Servers: React.FC = () => {
-  const [servers, setServers] = useState([
-    {
-      id: '1',
-      name: 'Minecraft Creative',
-      game: 'Minecraft',
-      status: 'online' as const,
-      players: { current: 24, max: 50 },
-      resources: { cpu: 45, memory: 67 },
-      uptime: '2d 14h'
-    },
-    {
-      id: '2',
-      name: 'CS:GO Competitive',
-      game: 'CS:GO',
-      status: 'online' as const,
-      players: { current: 18, max: 20 },
-      resources: { cpu: 32, memory: 54 },
-      uptime: '1d 8h'
-    },
-    {
-      id: '3',
-      name: 'Rust Vanilla',
-      game: 'Rust',
-      status: 'offline' as const,
-      players: { current: 0, max: 100 },
-      resources: { cpu: 0, memory: 0 },
-      uptime: '0m'
-    },
-    {
-      id: '4',
-      name: 'GMod DarkRP',
-      game: "Garry's Mod",
-      status: 'starting' as const,
-      players: { current: 0, max: 32 },
-      resources: { cpu: 15, memory: 23 },
-      uptime: '0m'
-    }
-  ]);
+  const [servers, setServers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  useEffect(() => {
+    fetchServers();
+  }, []);
+
+  const fetchServers = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/servers');
+      setServers(response.data);
+    } catch (error) {
+      console.error('Error fetching servers:', error);
+      toast.error('Failed to fetch servers');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredServers = servers.filter(server => {
     const matchesSearch = server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,35 +36,62 @@ const Servers: React.FC = () => {
   });
 
   const handleServerStart = async (id: string) => {
-    setServers(prev => prev.map(server => 
-      server.id === id ? { ...server, status: 'starting' as const } : server
-    ));
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
       setServers(prev => prev.map(server => 
-        server.id === id ? { ...server, status: 'online' as const } : server
+        server.id === id ? { ...server, status: 'starting' as const } : server
       ));
+      
+      await api.post(`/servers/${id}/start`);
+      
+      // Refresh server data
+      await fetchServers();
       toast.success('Server started successfully');
-    }, 2000);
+    } catch (error) {
+      console.error('Error starting server:', error);
+      toast.error('Failed to start server');
+      // Revert status on error
+      setServers(prev => prev.map(server => 
+        server.id === id ? { ...server, status: 'offline' as const } : server
+      ));
+    }
   };
 
   const handleServerStop = async (id: string) => {
-    setServers(prev => prev.map(server => 
-      server.id === id ? { ...server, status: 'stopping' as const } : server
-    ));
-    
-    setTimeout(() => {
+    try {
       setServers(prev => prev.map(server => 
-        server.id === id ? { ...server, status: 'offline' as const, resources: { cpu: 0, memory: 0 } } : server
+        server.id === id ? { ...server, status: 'stopping' as const } : server
       ));
+      
+      await api.post(`/servers/${id}/stop`);
+      
+      // Refresh server data
+      await fetchServers();
       toast.success('Server stopped successfully');
-    }, 1500);
+    } catch (error) {
+      console.error('Error stopping server:', error);
+      toast.error('Failed to stop server');
+      // Revert status on error
+      setServers(prev => prev.map(server => 
+        server.id === id ? { ...server, status: 'online' as const } : server
+      ));
+    }
   };
 
   const handleServerRestart = async (id: string) => {
-    await handleServerStop(id);
-    setTimeout(() => handleServerStart(id), 2000);
+    try {
+      setServers(prev => prev.map(server => 
+        server.id === id ? { ...server, status: 'stopping' as const } : server
+      ));
+      
+      await api.post(`/servers/${id}/restart`);
+      
+      // Refresh server data
+      await fetchServers();
+      toast.success('Server restarted successfully');
+    } catch (error) {
+      console.error('Error restarting server:', error);
+      toast.error('Failed to restart server');
+    }
   };
 
   const handleServerManage = (id: string) => {
@@ -100,6 +109,13 @@ const Servers: React.FC = () => {
         
         <div className="flex items-center space-x-4">
           <button className="flex items-center space-x-2 px-4 py-2 bg-dark-800/50 hover:bg-dark-700 border border-gray-700 hover:border-gray-600 rounded-lg transition-colors text-gray-300 hover:text-white">
+            <RefreshCw className="h-4 w-4" />
+            <span>Refresh</span>
+          </button>
+          <button 
+            onClick={fetchServers}
+            className="flex items-center space-x-2 px-4 py-2 bg-dark-800/50 hover:bg-dark-700 border border-gray-700 hover:border-gray-600 rounded-lg transition-colors text-gray-300 hover:text-white"
+          >
             <RefreshCw className="h-4 w-4" />
             <span>Refresh</span>
           </button>
@@ -140,18 +156,30 @@ const Servers: React.FC = () => {
       </div>
 
       {/* Servers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredServers.map((server) => (
-          <ServerCard
-            key={server.id}
-            server={server}
-            onStart={handleServerStart}
-            onStop={handleServerStop}
-            onRestart={handleServerRestart}
-            onManage={handleServerManage}
-          />
-        ))}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-dark-800 rounded-xl p-6 animate-pulse">
+              <div className="h-32 bg-dark-700 rounded mb-4"></div>
+              <div className="h-4 bg-dark-700 rounded mb-2"></div>
+              <div className="h-4 bg-dark-700 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredServers.map((server) => (
+            <ServerCard
+              key={server.id}
+              server={server}
+              onStart={handleServerStart}
+              onStop={handleServerStop}
+              onRestart={handleServerRestart}
+              onManage={handleServerManage}
+            />
+          ))}
+        </div>
+      )}
 
       {filteredServers.length === 0 && (
         <div className="text-center py-12">

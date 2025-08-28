@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, Search, Edit, Trash2, Crown, User, Eye, Shield } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { api } from '../services/api';
+import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
 interface UserData {
@@ -15,48 +17,8 @@ interface UserData {
 }
 
 const Users: React.FC = () => {
-  const [users, setUsers] = useState<UserData[]>([
-    {
-      id: '1',
-      username: 'admin',
-      email: 'admin@gamehost.com',
-      role: 'admin',
-      status: 'online',
-      lastActive: new Date(),
-      serversAccess: 12,
-      createdAt: new Date('2024-01-01T00:00:00')
-    },
-    {
-      id: '2',
-      username: 'john_doe',
-      email: 'john@example.com',
-      role: 'user',
-      status: 'online',
-      lastActive: new Date('2024-01-15T10:30:00'),
-      serversAccess: 3,
-      createdAt: new Date('2024-01-05T14:20:00')
-    },
-    {
-      id: '3',
-      username: 'jane_smith',
-      email: 'jane@example.com',
-      role: 'user',
-      status: 'offline',
-      lastActive: new Date('2024-01-14T18:45:00'),
-      serversAccess: 2,
-      createdAt: new Date('2024-01-08T09:15:00')
-    },
-    {
-      id: '4',
-      username: 'viewer01',
-      email: 'viewer@example.com',
-      role: 'viewer',
-      status: 'offline',
-      lastActive: new Date('2024-01-13T16:30:00'),
-      serversAccess: 0,
-      createdAt: new Date('2024-01-12T11:40:00')
-    }
-  ]);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -67,6 +29,29 @@ const Users: React.FC = () => {
     password: '',
     role: 'user' as const
   });
+
+  React.useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/users');
+      const usersData = response.data.map(user => ({
+        ...user,
+        lastActive: new Date(user.lastActive),
+        createdAt: new Date(user.createdAt),
+        serversAccess: user.serversAccess || 0
+      }));
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Failed to fetch users');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -93,24 +78,59 @@ const Users: React.FC = () => {
     }
   };
 
-  const handleCreateUser = (e: React.FormEvent) => {
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user: UserData = {
-      id: (users.length + 1).toString(),
-      ...newUser,
-      status: 'offline',
-      lastActive: new Date(),
-      serversAccess: 0,
-      createdAt: new Date()
-    };
-    setUsers(prev => [...prev, user]);
-    setNewUser({ username: '', email: '', password: '', role: 'user' });
-    setShowCreateModal(false);
+    
+    try {
+      const response = await api.post('/users', newUser);
+      const createdUser = {
+        ...response.data,
+        lastActive: new Date(response.data.lastActive),
+        createdAt: new Date(response.data.createdAt),
+        serversAccess: 0,
+        status: 'offline' as const
+      };
+      
+      setUsers(prev => [...prev, createdUser]);
+      setNewUser({ username: '', email: '', password: '', role: 'user' });
+      setShowCreateModal(false);
+      toast.success('User created successfully');
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast.error('Failed to create user');
+    }
   };
 
-  const handleDeleteUser = (userId: string) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    
+    try {
+      await api.delete(`/users/${userId}`);
+      setUsers(prev => prev.filter(u => u.id !== userId));
+      toast.success('User deleted successfully');
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Failed to delete user');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-dark-800 rounded w-48 mb-2"></div>
+          <div className="h-4 bg-dark-800 rounded w-96"></div>
+        </div>
+        <div className="bg-dark-800 border border-gray-700 rounded-lg p-6">
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-16 bg-dark-700 rounded animate-pulse"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
