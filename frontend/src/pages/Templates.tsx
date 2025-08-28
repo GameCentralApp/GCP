@@ -139,7 +139,7 @@ const Templates: React.FC = () => {
               selectedCategory === category
                 ? 'bg-primary-600 text-white'
                 : 'bg-dark-800 text-gray-300 hover:bg-dark-700'
-            className="px-3 py-2 bg-dark-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-neon-cyan"
+            )}
           >
             {category}
           </button>
