@@ -133,9 +133,11 @@ const Settings: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-3">
-          <button className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors">
+          <button 
             onClick={handleReset}
             disabled={loading}
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
+          >
             <RefreshCw className="h-4 w-4" />
             <span>Reset</span>
           </button>
