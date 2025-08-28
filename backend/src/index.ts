@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
-import { authenticateToken } from './middleware/auth';
+import { authenticateToken, requireAdmin } from './middleware/auth';
 
 // Load environment variables
 dotenv.config();
@@ -33,15 +33,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   next();
-});
-
-// Simple logging
-const log = (message: string) => {
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(`[${new Date().toISOString()}] ${message}`);
-  }
-};
-
 // Health check
 app.get('/health', (req: Request, res: Response) => {
   log('Health check requested');
