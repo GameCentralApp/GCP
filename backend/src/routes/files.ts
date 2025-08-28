@@ -5,6 +5,12 @@ import fs from 'fs/promises';
 import archiver from 'archiver';
 import { prisma } from '../config/database';
 import { logger } from '../utils/logger';
+import { Request } from 'express';
+
+// Extend Request interface for multer
+interface MulterRequest extends Request {
+  files?: Express.Multer.File[];
+}
 
 const router = express.Router();
 
@@ -80,7 +86,7 @@ router.get('/:serverId', async (req, res) => {
 });
 
 // Upload files
-router.post('/:serverId/upload', upload.array('files'), async (req, res) => {
+router.post('/:serverId/upload', upload.array('files'), async (req: MulterRequest, res) => {
   try {
     const { serverId } = req.params;
     const user = (req as any).user;
@@ -97,7 +103,7 @@ router.post('/:serverId/upload', upload.array('files'), async (req, res) => {
       return res.status(404).json({ error: 'Server not found' });
     }
 
-    const files = req.files as Express.Multer.File[];
+    const files = req.files || [];
     const uploadedFiles = files.map(file => ({
       name: file.originalname,
       size: file.size,
