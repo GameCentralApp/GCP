@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { Request, Response, NextFunction } from 'express';
 
 // Load environment variables
 dotenv.config();
@@ -25,7 +26,7 @@ const log = (message: string) => {
 };
 
 // Health check
-app.get('/health', (req: express.Request, res: express.Response) => {
+app.get('/health', (req: Request, res: Response) => {
   log('Health check requested');
   res.json({ 
     status: 'OK', 
@@ -35,7 +36,7 @@ app.get('/health', (req: express.Request, res: express.Response) => {
 });
 
 // Add a GET route for login endpoint to show proper error
-app.get('/api/auth/login', (req: express.Request, res: express.Response) => {
+app.get('/api/auth/login', (req: Request, res: Response) => {
   log('GET request to login endpoint - should be POST');
   res.status(405).json({ 
     error: 'Method not allowed. Use POST for login.',
@@ -50,7 +51,7 @@ app.get('/api/auth/login', (req: express.Request, res: express.Response) => {
 });
 
 // Auth middleware
-const authenticateToken = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -59,7 +60,7 @@ const authenticateToken = (req: express.Request, res: express.Response, next: ex
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as any;
     (req as any).user = decoded;
     next();
   } catch (error) {
@@ -68,7 +69,7 @@ const authenticateToken = (req: express.Request, res: express.Response, next: ex
 };
 
 // Login endpoint
-app.post('/api/auth/login', async (req: express.Request, res: express.Response) => {
+app.post('/api/auth/login', async (req: Request, res: Response) => {
   try {
     log(`POST /api/auth/login - Login attempt for user: ${req.body?.username}`);
     log(`Request body: ${JSON.stringify(req.body)}`);
@@ -121,7 +122,7 @@ app.post('/api/auth/login', async (req: express.Request, res: express.Response) 
 });
 
 // Handle GET request to login endpoint (for debugging)
-app.get('/api/auth/login', (req: express.Request, res: express.Response) => {
+app.get('/api/auth/login', (req: Request, res: Response) => {
   log('GET request to /api/auth/login - this should be a POST request');
   res.status(405).json({ 
     error: 'Method not allowed. Use POST to login.',
@@ -131,7 +132,7 @@ app.get('/api/auth/login', (req: express.Request, res: express.Response) => {
 });
 
 // Get current user
-app.get('/api/auth/me', authenticateToken, async (req: express.Request, res: express.Response) => {
+app.get('/api/auth/me', authenticateToken, async (req: Request, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: (req as any).user.userId },
@@ -155,7 +156,7 @@ app.get('/api/auth/me', authenticateToken, async (req: express.Request, res: exp
 });
 
 // Basic servers endpoint
-app.get('/api/servers', authenticateToken, async (req: express.Request, res: express.Response) => {
+app.get('/api/servers', authenticateToken, async (req: Request, res: Response) => {
   try {
     log(`Servers requested by user: ${(req as any).user.username}`);
     
@@ -189,7 +190,7 @@ app.get('/api/servers', authenticateToken, async (req: express.Request, res: exp
 });
 
 // Error handling
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   log(`Unhandled error: ${err.message}`);
   res.status(500).json({ error: 'Internal server error' });
 });
