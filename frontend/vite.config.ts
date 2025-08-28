@@ -7,19 +7,20 @@ export default defineConfig({
     port: 3000,
     host: true,
     hmr: {
-      overlay: false // Disable error overlay for better performance
+      overlay: false
     }
   },
   build: {
     target: 'es2015',
-    minify: 'esbuild', // Use esbuild instead of terser for faster builds
-    sourcemap: false, // Disable sourcemaps for smaller builds
+    minify: 'esbuild',
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          ui: ['lucide-react', 'recharts'],
+          ui: ['lucide-react'],
+          charts: ['recharts'],
           utils: ['axios', 'date-fns', 'clsx']
         }
       }
@@ -27,7 +28,13 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000
   },
   optimizeDeps: {
-    exclude: ['lucide-react'],
-    include: ['react', 'react-dom', 'react-router-dom', 'axios']
+    include: ['react', 'react-dom', 'react-router-dom', 'axios', 'clsx'],
+    exclude: ['lucide-react']
   },
+  esbuild: {
+    target: 'es2015',
+    minifyIdentifiers: true,
+    minifySyntax: true,
+    minifyWhitespace: true
+  }
 });
