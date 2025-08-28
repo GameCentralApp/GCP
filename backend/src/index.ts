@@ -234,6 +234,120 @@ app.get('/api/templates', authenticateToken, async (req: Request, res: Response)
   }
 });
 
+// Settings endpoints
+app.get('/api/settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  try {
+    log(`Settings requested by admin: ${(req as any).user.username}`);
+    
+    const settings = await prisma.setting.findMany();
+    
+    // Convert to nested object structure
+    const settingsObj = {
+      general: {
+        siteName: 'GameHost Control Panel',
+        siteDescription: 'Open-source game server management',
+        maxServersPerUser: 5,
+        defaultMemoryLimit: 2048,
+        allowRegistration: true,
+        maintenanceMode: false
+      },
+      docker: {
+        dockerHost: '/var/run/docker.sock',
+        networkName: 'gamehost-network',
+        defaultImage: 'ubuntu:20.04',
+        autoCleanup: true,
+        imageUpdateInterval: 24
+      },
+      security: {
+        sessionTimeout: 24,
+        maxLoginAttempts: 5,
+        passwordMinLength: 8,
+        requireTwoFactor: false,
+        allowApiAccess: true
+      },
+      notifications: {
+        serverDown: true,
+        highResourceUsage: true,
+        userRegistration: false,
+        systemUpdates: true,
+        backupComplete: true
+      }
+    };
+
+    // Override with database values
+    settings.forEach(setting => {
+      const keys = setting.key.split('.');
+      if (keys.length === 2) {
+        const [section, key] = keys;
+        if (settingsObj[section]) {
+          let value = setting.value;
+          if (setting.type === 'boolean') {
+            value = setting.value === 'true';
+          } else if (setting.type === 'number') {
+            value = parseFloat(setting.value);
+          }
+          settingsObj[section][key] = value;
+        }
+      }
+    });
+
+    return res.json(settingsObj);
+  } catch (error) {
+    log(`Settings error: ${error}`);
+    return res.status(500).json({ error: 'Failed to fetch settings' });
+  }
+});
+
+app.put('/api/settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  try {
+    log(`Settings update by admin: ${(req as any).user.username}`);
+    const updates = req.body;
+    
+    // Flatten nested settings object
+    const flatSettings = {};
+    Object.keys(updates).forEach(section => {
+      Object.keys(updates[section]).forEach(key => {
+        flatSettings[`${section}.${key}`] = updates[section][key];
+      });
+    });
+    
+    // Update each setting
+    for (const [key, value] of Object.entries(flatSettings)) {
+      const type = typeof value === 'boolean' ? 'boolean' :
+                   typeof value === 'number' ? 'number' : 'string';
+      
+      const stringValue = String(value);
+      
+      await prisma.setting.upsert({
+        where: { key },
+        update: { value: stringValue, type },
+        create: { key, value: stringValue, type }
+      });
+    }
+
+    log(`Settings updated successfully`);
+    res.json({ message: 'Settings updated successfully' });
+  } catch (error) {
+    log(`Error updating settings: ${error}`);
+    res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
+app.post('/api/settings/reset', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  try {
+    log(`Settings reset by admin: ${(req as any).user.username}`);
+    
+    // Delete all custom settings
+    await prisma.setting.deleteMany();
+    
+    log(`Settings reset to defaults`);
+    res.json({ message: 'Settings reset to defaults' });
+  } catch (error) {
+    log(`Error resetting settings: ${error}`);
+    res.status(500).json({ error: 'Failed to reset settings' });
+  }
+});
+
 // Basic users endpoint (admin only)
 const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
   const user = (req as any).user;
