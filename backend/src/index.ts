@@ -42,8 +42,18 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 }
 )
 // Health check
-app.get('/health', (req: Request, res: Response) => {
+app.get('/api/health', (req: Request, res: Response) => {
   log('Health check requested');
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    service: 'Game Central CP Backend'
+  });
+});
+
+// Keep the old health endpoint for backward compatibility
+app.get('/health', (req: Request, res: Response) => {
+  log('Health check requested (legacy endpoint)');
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
