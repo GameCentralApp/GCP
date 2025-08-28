@@ -14,11 +14,14 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    console.log('Login form submitted with:', { username, password: '***' });
 
     try {
       await login(username, password);
       toast.success('Login successful!');
     } catch (error) {
+      console.error('Login error in component:', error);
       toast.error('Invalid credentials');
     } finally {
       setIsLoading(false);

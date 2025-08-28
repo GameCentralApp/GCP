@@ -49,8 +49,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (username: string, password: string) => {
     try {
       console.log('Attempting login for user:', username);
-      console.log('Making POST request to /auth/login');
-      const response = await api.post('/auth/login', { username, password });
+      console.log('Making POST request to /api/auth/login');
+      const response = await api.post('/auth/login', { 
+        username, 
+        password 
+      });
       console.log('Login response:', response.data);
       const { token, user } = response.data;
       
@@ -58,9 +61,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(user);
     } catch (error) {
       console.error('Login failed:', error);
-      if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
+      if ((error as any).response) {
+        console.error('Response status:', (error as any).response.status);
+        console.error('Response data:', (error as any).response.data);
       }
       throw error;
     }

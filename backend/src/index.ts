@@ -41,6 +41,7 @@ app.get('/api/auth/login', (req: express.Request, res: express.Response) => {
     error: 'Method not allowed. Use POST for login.',
     method: 'POST',
     endpoint: '/api/auth/login',
+    message: 'This endpoint only accepts POST requests with username and password in the request body',
     body: {
       username: 'string',
       password: 'string'
@@ -69,7 +70,8 @@ const authenticateToken = (req: express.Request, res: express.Response, next: ex
 // Login endpoint
 app.post('/api/auth/login', async (req: express.Request, res: express.Response) => {
   try {
-    log(`Login attempt for user: ${req.body.username}`);
+    log(`POST /api/auth/login - Login attempt for user: ${req.body?.username}`);
+    log(`Request body:`, JSON.stringify(req.body));
     const { username, password } = req.body;
 
     if (!username || !password) {
