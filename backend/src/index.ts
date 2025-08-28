@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
+import { authenticateToken } from './middleware/auth';
 
 // Load environment variables
 dotenv.config();
@@ -265,17 +266,69 @@ app.get('/api/templates', authenticateToken, async (req: Request, res: Response)
 });
 
 // Basic users endpoint (admin only)
-app.get('/api/users', authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const user = (req as any).user;
-    
-    if (user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
+const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  const user = (req as any).user;
+  if (user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  return next();
+};
 
-    log(`Users requested by admin: ${user.username}`);
+app.get('/api/users', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  try {
+    log(`Users requested by admin: ${(req as any).user.username}`);
     
     const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        status: true,
+        lastActive: true,
+        createdAt: true,
+        _count: { select: { servers: true } }
+      }
+    });
+
+    return res.json(users);
+  } catch (error) {
+    log(`Users error: ${error}`);
+    return res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// Create user (admin only)
+app.post('/api/users', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { username, email, password, role } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'Username, email, and password are required' });
+    }
+
+    // Check if user exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ username }, { email }]
+      }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username or email already exists' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+        role: role || 'user'
+      },
       select: {
         id: true,
         username: true,
@@ -287,10 +340,76 @@ app.get('/api/users', authenticateToken, async (req: Request, res: Response) => 
       }
     });
 
-    return res.json(users);
+    log(`User created: ${username} by admin: ${(req as any).user.username}`);
+    return res.status(201).json(user);
   } catch (error) {
-    log(`Users error: ${error}`);
-    return res.status(500).json({ error: 'Failed to fetch users' });
+    log(`Error creating user: ${error}`);
+    return res.status(500).json({ error: 'Failed to create user' });
+  }
+});
+
+// Update user (admin only)
+app.put('/api/users/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { username, email, role, password } = req.body;
+
+    const updateData: any = {};
+    if (username) updateData.username = username;
+    if (email) updateData.email = email;
+    if (role) updateData.role = role;
+    if (password) updateData.password = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        status: true,
+        lastActive: true,
+        createdAt: true
+      }
+    });
+
+    log(`User updated: ${user.username} by admin: ${(req as any).user.username}`);
+    return res.json(user);
+  } catch (error) {
+    log(`Error updating user: ${error}`);
+    return res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+// Delete user (admin only)
+app.delete('/api/users/:id', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const currentUser = (req as any).user;
+
+    // Prevent admin from deleting themselves
+    if (id === currentUser.userId) {
+      return res.status(400).json({ error: 'Cannot delete your own account' });
+    }
+
+    // Get user info before deletion
+    const userToDelete = await prisma.user.findUnique({
+      where: { id },
+      select: { username: true }
+    });
+
+    if (!userToDelete) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    await prisma.user.delete({ where: { id } });
+
+    log(`User deleted: ${userToDelete.username} by admin: ${currentUser.username}`);
+    return res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    log(`Error deleting user: ${error}`);
+    return res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 

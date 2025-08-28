@@ -38,11 +38,11 @@ const Users: React.FC = () => {
     try {
       setLoading(true);
       const response = await api.get('/users');
-      const usersData = response.data.map(user => ({
+      const usersData = response.data.map((user: any) => ({
         ...user,
         lastActive: new Date(user.lastActive),
         createdAt: new Date(user.createdAt),
-        serversAccess: user.serversAccess || 0
+        serversAccess: user._count?.servers || 0
       }));
       setUsers(usersData);
     } catch (error) {
@@ -81,12 +81,17 @@ const Users: React.FC = () => {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!newUser.username || !newUser.email || !newUser.password) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
     try {
       const response = await api.post('/users', newUser);
       const createdUser = {
         ...response.data,
-        lastActive: new Date(response.data.lastActive),
-        createdAt: new Date(response.data.createdAt),
+        lastActive: new Date(response.data.lastActive || new Date()),
+        createdAt: new Date(response.data.createdAt || new Date()),
         serversAccess: 0,
         status: 'offline' as const
       };
@@ -97,7 +102,8 @@ const Users: React.FC = () => {
       toast.success('User created successfully');
     } catch (error) {
       console.error('Error creating user:', error);
-      toast.error('Failed to create user');
+      const errorMessage = (error as any)?.response?.data?.error || 'Failed to create user';
+      toast.error(errorMessage);
     }
   };
 

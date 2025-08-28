@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { logger } from '../utils/logger';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -23,7 +22,6 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
     req.user = decoded;
     return next();
   } catch (error) {
-    logger.warn('Invalid token provided:', error);
     return res.status(403).json({ error: 'Invalid token' });
   }
 };
