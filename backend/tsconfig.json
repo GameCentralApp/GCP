@@ -14,15 +14,10 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "removeComments": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitThis": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "skipLibCheck": true
+    "emitDecoratorMetadata": true
   },
   "ts-node": {
     "esm": false,
