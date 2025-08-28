@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, RefreshCw } from 'lucide-react';
+import { Plus, Search, Filter, RefreshCw, Server } from 'lucide-react';
 import ServerCard from '../components/UI/ServerCard';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
