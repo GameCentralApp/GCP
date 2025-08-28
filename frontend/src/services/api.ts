@@ -9,13 +9,10 @@ console.log('- Full API URL will be:', `${API_BASE_URL}/api`);
 
 export const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
-  timeout: 5000, // Reduced timeout for faster failure detection
+  timeout: 10000, // Increased timeout for server connection
   headers: {
     'Content-Type': 'application/json',
-    'Accept-Encoding': 'gzip, deflate, br', // Enable compression
   },
-  // Enable request/response compression
-  decompress: true,
 });
 
 // Request cache for GET requests
