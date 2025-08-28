@@ -280,7 +280,7 @@ app.get('/api/settings', authenticateToken, requireAdmin, async (req: Request, r
       if (keys.length === 2) {
         const [section, key] = keys;
         if (settingsObj[section]) {
-          let value = setting.value;
+          let value: any = setting.value;
           if (setting.type === 'boolean') {
             value = setting.value === 'true';
           } else if (setting.type === 'number') {
@@ -304,7 +304,7 @@ app.put('/api/settings', authenticateToken, requireAdmin, async (req: Request, r
     const updates = req.body;
     
     // Flatten nested settings object
-    const flatSettings = {};
+    const flatSettings: Record<string, any> = {};
     Object.keys(updates).forEach(section => {
       Object.keys(updates[section]).forEach(key => {
         flatSettings[`${section}.${key}`] = updates[section][key];
@@ -349,14 +349,6 @@ app.post('/api/settings/reset', authenticateToken, requireAdmin, async (req: Req
 });
 
 // Basic users endpoint (admin only)
-const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
-  const user = (req as any).user;
-  if (user.role !== 'admin') {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-  return next();
-};
-
 app.get('/api/users', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     log(`Users requested by admin: ${(req as any).user.username}`);
