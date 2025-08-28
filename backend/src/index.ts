@@ -25,7 +25,7 @@ const log = (message: string) => {
 };
 
 // Health check
-app.get('/health', (req: any, res: any) => {
+app.get('/health', (req: express.Request, res: express.Response) => {
   log('Health check requested');
   res.json({ 
     status: 'OK', 
@@ -35,7 +35,7 @@ app.get('/health', (req: any, res: any) => {
 });
 
 // Add a GET route for login endpoint to show proper error
-app.get('/api/auth/login', (req, res) => {
+app.get('/api/auth/login', (req: express.Request, res: express.Response) => {
   log('GET request to login endpoint - should be POST');
   res.status(405).json({ 
     error: 'Method not allowed. Use POST for login.',
@@ -49,7 +49,7 @@ app.get('/api/auth/login', (req, res) => {
 });
 
 // Auth middleware
-const authenticateToken = (req: any, res: any, next: any) => {
+const authenticateToken = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -59,7 +59,7 @@ const authenticateToken = (req: any, res: any, next: any) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret');
-    req.user = decoded;
+    (req as any).user = decoded;
     next();
   } catch (error) {
     return res.status(403).json({ error: 'Invalid token' });
@@ -67,7 +67,7 @@ const authenticateToken = (req: any, res: any, next: any) => {
 };
 
 // Login endpoint
-app.post('/api/auth/login', async (req: any, res: any) => {
+app.post('/api/auth/login', async (req: express.Request, res: express.Response) => {
   try {
     log(`Login attempt for user: ${req.body.username}`);
     const { username, password } = req.body;
@@ -129,10 +129,10 @@ app.get('/api/auth/login', (req, res) => {
 });
 
 // Get current user
-app.get('/api/auth/me', authenticateToken, async (req: any, res: any) => {
+app.get('/api/auth/me', authenticateToken, async (req: express.Request, res: express.Response) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
+      where: { id: (req as any).user.userId },
       select: {
         id: true,
         username: true,
@@ -153,9 +153,9 @@ app.get('/api/auth/me', authenticateToken, async (req: any, res: any) => {
 });
 
 // Basic servers endpoint
-app.get('/api/servers', authenticateToken, async (req: any, res: any) => {
+app.get('/api/servers', authenticateToken, async (req: express.Request, res: express.Response) => {
   try {
-    log(`Servers requested by user: ${req.user.username}`);
+    log(`Servers requested by user: ${(req as any).user.username}`);
     
     // Mock data for now
     const servers = [
@@ -187,7 +187,7 @@ app.get('/api/servers', authenticateToken, async (req: any, res: any) => {
 });
 
 // Error handling
-app.use((err: any, req: any, res: any, next: any) => {
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   log(`Unhandled error: ${err.message}`);
   res.status(500).json({ error: 'Internal server error' });
 });
