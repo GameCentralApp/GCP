@@ -1,9 +1,9 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
 
 // Load environment variables
 dotenv.config();
@@ -71,7 +71,7 @@ const authenticateToken = (req: express.Request, res: express.Response, next: ex
 app.post('/api/auth/login', async (req: express.Request, res: express.Response) => {
   try {
     log(`POST /api/auth/login - Login attempt for user: ${req.body?.username}`);
-    log(`Request body:`, JSON.stringify(req.body));
+    log(`Request body: ${JSON.stringify(req.body)}`);
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -121,7 +121,7 @@ app.post('/api/auth/login', async (req: express.Request, res: express.Response) 
 });
 
 // Handle GET request to login endpoint (for debugging)
-app.get('/api/auth/login', (req, res) => {
+app.get('/api/auth/login', (req: express.Request, res: express.Response) => {
   log('GET request to /api/auth/login - this should be a POST request');
   res.status(405).json({ 
     error: 'Method not allowed. Use POST to login.',
