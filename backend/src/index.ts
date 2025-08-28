@@ -11,7 +11,7 @@ dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 5000;
+const PORT = parseInt(process.env.PORT || '5000', 10);
 
 // Middleware
 app.use(cors({
@@ -62,7 +62,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as any;
     (req as any).user = decoded;
-    next();
+    return next();
   } catch (error) {
     return res.status(403).json({ error: 'Invalid token' });
   }
