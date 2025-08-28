@@ -11,30 +11,31 @@ export default defineConfig({
     }
   },
   build: {
-    target: 'es2015',
+    target: 'es2020',
     minify: 'esbuild',
     sourcemap: false,
+    cssMinify: true,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          ui: ['lucide-react'],
           charts: ['recharts'],
-          utils: ['axios', 'date-fns', 'clsx']
+          icons: ['lucide-react']
         }
       }
     },
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 500
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'axios', 'clsx'],
-    exclude: ['lucide-react']
+    include: ['react', 'react-dom', 'react-router-dom', 'axios', 'clsx', 'date-fns'],
+    exclude: []
   },
   esbuild: {
-    target: 'es2015',
+    target: 'es2020',
     minifyIdentifiers: true,
     minifySyntax: true,
-    minifyWhitespace: true
+    minifyWhitespace: true,
+    drop: ['console', 'debugger']
   }
 });

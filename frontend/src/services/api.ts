@@ -1,27 +1,18 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-console.log('API Configuration:');
-console.log('- VITE_API_URL from env:', import.meta.env.VITE_API_URL);
-console.log('- Final API_BASE_URL:', API_BASE_URL);
-console.log('- Full API URL will be:', `${API_BASE_URL}/api`);
-
-// Force the correct URL for now
-const FORCED_API_URL = 'http://31.97.117.108:5000';
-console.log('- Using forced API URL:', FORCED_API_URL);
+const API_BASE_URL = 'http://31.97.117.108:5000';
 
 export const api = axios.create({
-  baseURL: `${FORCED_API_URL}/api`,
-  timeout: 10000, // Increased timeout for server connection
+  baseURL: `${API_BASE_URL}/api`,
+  timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request cache for GET requests
-const requestCache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_DURATION = 30000; // 30 seconds
+// Simple request cache
+const cache = new Map();
+const CACHE_TIME = 30000; // 30 seconds
 
 // Add auth token to requests
 api.interceptors.request.use((config) => {
@@ -30,50 +21,33 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   
-  // Only log in development
-  if (import.meta.env.DEV) {
-    console.log('API Request:', config.method?.toUpperCase(), config.url, config.data);
-    console.log('- Full URL:', `${config.baseURL}${config.url}`);
-    console.log('- Headers:', config.headers);
-  }
-  
-  // Check cache for GET requests
-  if (config.method === 'get' && config.url) {
+  // Simple caching for GET requests
+  if (config.method === 'get') {
     const cacheKey = `${config.url}${JSON.stringify(config.params || {})}`;
-    const cached = requestCache.get(cacheKey);
-    if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
-      return Promise.resolve({ ...config, data: cached.data, cached: true });
+    const cached = cache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < CACHE_TIME) {
+      return Promise.resolve({ ...config, data: cached.data, fromCache: true });
     }
   }
   
   return config;
 });
 
-// Handle auth errors
+// Handle responses and cache
 api.interceptors.response.use(
   (response) => {
     // Cache GET responses
-    if (response.config.method === 'get' && response.config.url) {
+    if (response.config.method === 'get' && !response.config.fromCache) {
       const cacheKey = `${response.config.url}${JSON.stringify(response.config.params || {})}`;
-      requestCache.set(cacheKey, {
+      cache.set(cacheKey, {
         data: response.data,
         timestamp: Date.now()
       });
     }
     
-    if (import.meta.env.DEV) {
-      console.log('API Response SUCCESS:', response.status, response.config.url);
-    }
     return response;
   },
   (error) => {
-    if (import.meta.env.DEV) {
-      console.error('API Response ERROR:', error.message);
-      console.error('- URL:', error.config?.url);
-      console.error('- Method:', error.config?.method);
-      console.error('- Status:', error.response?.status);
-      console.error('- Response data:', error.response?.data);
-    }
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.reload();
