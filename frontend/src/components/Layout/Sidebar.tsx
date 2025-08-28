@@ -11,6 +11,7 @@ import {
   Zap
 } from 'lucide-react';
 import clsx from 'clsx';
+import SystemStatus from '../UI/SystemStatus';
 
 interface SidebarProps {
   isOpen: boolean;
