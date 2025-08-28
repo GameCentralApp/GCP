@@ -30,10 +30,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const location = useLocation();
 
   return (
-    <div className={clsx(
-      'bg-dark-900/50 backdrop-blur-xl border-r border-gray-700/50 transition-all duration-300 flex flex-col relative',
-      isOpen ? 'w-64' : 'w-16'
-    )}>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onToggle}
+        />
+      )}
+      
+      <div className={clsx(
+        'bg-dark-900/50 backdrop-blur-xl border-r border-gray-700/50 transition-all duration-300 flex flex-col relative z-50',
+        // Desktop behavior
+        'hidden lg:flex',
+        isOpen ? 'lg:w-64' : 'lg:w-16',
+        // Mobile behavior
+        'lg:relative fixed top-0 left-0 h-full',
+        isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'
+      )}>
       {/* Neon accent line */}
       <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-neon-cyan via-primary-500 to-neon-purple opacity-60"></div>
       
@@ -45,11 +59,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
               <div className="p-2 bg-dark-800/50 rounded-lg border border-neon-cyan/30">
                 <Zap className="h-5 w-5 text-neon-cyan" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className="font-bold text-lg bg-gradient-to-r from-neon-cyan to-primary-400 bg-clip-text text-transparent">
                   GameHost
                 </span>
-                <div className="text-xs text-gray-500">Control Panel</div>
+                <div className="text-xs text-gray-500 truncate">Control Panel</div>
               </div>
             </div>
           )}
@@ -85,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                   )}
                   <Icon className={clsx('h-5 w-5 flex-shrink-0 relative z-10', isActive && 'drop-shadow-lg')} />
                   {isOpen && (
-                    <span className="font-medium text-sm animate-fade-in relative z-10">{item.label}</span>
+                    <span className="font-medium text-sm animate-fade-in relative z-10 whitespace-nowrap">{item.label}</span>
                   )}
                   {isActive && isOpen && (
                     <div className="absolute right-2 w-2 h-2 bg-neon-cyan rounded-full animate-pulse"></div>
@@ -104,6 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
