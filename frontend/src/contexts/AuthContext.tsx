@@ -17,6 +17,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// Cache user data
+let userCache: User | null = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,14 +38,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    // Check cache first
+    const now = Date.now();
+    if (userCache && (now - cacheTimestamp) < CACHE_DURATION) {
+      console.log('Using cached user data');
+      setUser(userCache);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       console.log('Checking authentication with token:', token.substring(0, 20) + '...');
       const response = await api.get('/auth/me');
       console.log('Auth check successful:', response.data);
+      
+      // Update cache
+      userCache = response.data;
+      cacheTimestamp = now;
+      
       setUser(response.data);
     } catch (error) {
       console.error('Auth check failed:', error);
       localStorage.removeItem('token');
+      userCache = null;
     } finally {
       setIsLoading(false);
     }
@@ -58,6 +78,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { token, user } = response.data;
       
       localStorage.setItem('token', token);
+      
+      // Update cache
+      userCache = user;
+      cacheTimestamp = Date.now();
+      
       setUser(user);
     } catch (error) {
       console.error('Login failed:', error);
@@ -71,6 +96,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('token');
+    userCache = null;
+    cacheTimestamp = 0;
     setUser(null);
   };
 

@@ -5,24 +5,40 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
+import compression from 'compression';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['error'], // Only log errors in production
+});
 const PORT = parseInt(process.env.PORT || '5000', 10);
 
 // Middleware
+app.use(compression()); // Enable gzip compression
 app.use(cors({
   origin: ['http://31.97.117.108:3000', 'http://localhost:3000', 'http://127.0.0.1:3000'],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200 // For legacy browser support
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Set reasonable limit
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Security headers
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 
 // Simple logging
 const log = (message: string) => {
-  console.log(`[${new Date().toISOString()}] ${message}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[${new Date().toISOString()}] ${message}`);
+  }
 };
 
 // Health check
@@ -51,6 +67,8 @@ app.get('/api/auth/login', (req: Request, res: Response) => {
 });
 
 // Auth middleware
+const tokenCache = new Map<string, any>();
+
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
@@ -59,9 +77,20 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
     return res.status(401).json({ error: 'Access token required' });
   }
 
+  // Check cache first
+  if (tokenCache.has(token)) {
+    (req as any).user = tokenCache.get(token);
+    return next();
+  }
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as any;
     (req as any).user = decoded;
+    
+    // Cache the decoded token for 5 minutes
+    tokenCache.set(token, decoded);
+    setTimeout(() => tokenCache.delete(token), 5 * 60 * 1000);
+    
     return next();
   } catch (error) {
     return res.status(403).json({ error: 'Invalid token' });
@@ -160,7 +189,7 @@ app.get('/api/servers', authenticateToken, async (req: Request, res: Response) =
   try {
     log(`Servers requested by user: ${(req as any).user.username}`);
     
-    // Mock data for now
+    // Optimized mock data with caching
     const servers = [
       {
         id: '1',
@@ -169,7 +198,8 @@ app.get('/api/servers', authenticateToken, async (req: Request, res: Response) =
         status: 'online',
         players: { current: 24, max: 50 },
         resources: { cpu: 45, memory: 67 },
-        uptime: '2d 14h'
+        uptime: '2d 14h',
+        lastUpdated: new Date().toISOString()
       },
       {
         id: '2',
@@ -178,10 +208,13 @@ app.get('/api/servers', authenticateToken, async (req: Request, res: Response) =
         status: 'online',
         players: { current: 18, max: 20 },
         resources: { cpu: 32, memory: 54 },
-        uptime: '1d 8h'
+        uptime: '1d 8h',
+        lastUpdated: new Date().toISOString()
       }
     ];
 
+    // Set cache headers
+    res.setHeader('Cache-Control', 'public, max-age=30'); // Cache for 30 seconds
     return res.json(servers);
   } catch (error) {
     log(`Servers error: ${error}`);

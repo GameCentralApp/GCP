@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Server, Users, HardDrive, Activity, AlertTriangle, TrendingUp } from 'lucide-react';
 import { Line, Bar } from 'recharts';
 import { ResponsiveContainer, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, BarChart } from 'recharts';
@@ -16,21 +16,29 @@ const Dashboard: React.FC = () => {
     networkOut: 1.8
   });
 
-  const [chartData] = useState([
+  // Memoize chart data to prevent unnecessary re-renders
+  const chartData = useMemo(() => [
     { time: '00:00', cpu: 25, memory: 45, network: 12 },
     { time: '04:00', cpu: 32, memory: 52, network: 18 },
     { time: '08:00', cpu: 45, memory: 67, network: 24 },
     { time: '12:00', cpu: 67, memory: 78, network: 35 },
     { time: '16:00', cpu: 54, memory: 65, network: 28 },
     { time: '20:00', cpu: 38, memory: 58, network: 22 },
-  ]);
+  ], []);
 
-  const [recentServers] = useState([
+  const recentServers = useMemo(() => [
     { id: '1', name: 'Minecraft Creative', game: 'Minecraft', status: 'online', players: '24/50' },
     { id: '2', name: 'CS:GO Competitive', game: 'CS:GO', status: 'online', players: '18/20' },
     { id: '3', name: 'Rust Vanilla', game: 'Rust', status: 'offline', players: '0/100' },
     { id: '4', name: 'GMod DarkRP', game: "Garry's Mod", status: 'starting', players: '0/32' },
-  ]);
+  ], []);
+
+  // Memoize tooltip style to prevent recreation
+  const tooltipStyle = useMemo(() => ({
+    backgroundColor: '#1F2937',
+    border: '1px solid #374151',
+    color: '#fff'
+  }), []);
 
   return (
     <div className="space-y-6">
