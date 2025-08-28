@@ -1,14 +1,18 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://31.97.117.108:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 console.log('API Configuration:');
 console.log('- VITE_API_URL from env:', import.meta.env.VITE_API_URL);
 console.log('- Final API_BASE_URL:', API_BASE_URL);
 console.log('- Full API URL will be:', `${API_BASE_URL}/api`);
 
+// Force the correct URL for now
+const FORCED_API_URL = 'http://31.97.117.108:5000';
+console.log('- Using forced API URL:', FORCED_API_URL);
+
 export const api = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
+  baseURL: `${FORCED_API_URL}/api`,
   timeout: 10000, // Increased timeout for server connection
   headers: {
     'Content-Type': 'application/json',
