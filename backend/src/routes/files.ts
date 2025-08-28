@@ -9,7 +9,7 @@ import { Request } from 'express';
 
 // Extend Request interface for multer
 interface MulterRequest extends Request {
-  files?: Express.Multer.File[];
+  files?: any[];
 }
 
 const router = express.Router();
