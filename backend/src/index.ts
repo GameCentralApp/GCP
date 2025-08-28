@@ -34,6 +34,20 @@ app.get('/health', (req: any, res: any) => {
   });
 });
 
+// Add a GET route for login endpoint to show proper error
+app.get('/api/auth/login', (req, res) => {
+  log('GET request to login endpoint - should be POST');
+  res.status(405).json({ 
+    error: 'Method not allowed. Use POST for login.',
+    method: 'POST',
+    endpoint: '/api/auth/login',
+    body: {
+      username: 'string',
+      password: 'string'
+    }
+  });
+});
+
 // Auth middleware
 const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers.authorization;
@@ -102,6 +116,16 @@ app.post('/api/auth/login', async (req: any, res: any) => {
     log(`Login error: ${error}`);
     return res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+// Handle GET request to login endpoint (for debugging)
+app.get('/api/auth/login', (req, res) => {
+  log('GET request to /api/auth/login - this should be a POST request');
+  res.status(405).json({ 
+    error: 'Method not allowed. Use POST to login.',
+    method: req.method,
+    expectedMethod: 'POST'
+  });
 });
 
 // Get current user
