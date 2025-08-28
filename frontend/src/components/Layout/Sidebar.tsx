@@ -99,29 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
       {/* System Status */}
       {isOpen && (
         <div className="p-4 border-t border-gray-700/50">
-          <div className="bg-dark-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/30">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="relative">
-                <div className="w-3 h-3 bg-neon-green rounded-full animate-pulse"></div>
-                <div className="absolute inset-0 w-3 h-3 bg-neon-green rounded-full animate-ping opacity-75"></div>
-              </div>
-              <span className="text-sm font-medium text-gray-200">System Online</span>
-            </div>
-            <div className="text-xs text-gray-400 space-y-1">
-              <div className="flex justify-between">
-                <span>Docker:</span>
-                <span className="text-neon-green">Connected</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Uptime:</span>
-                <span className="text-gray-300 font-mono">2d 14h 32m</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Load:</span>
-                <span className="text-neon-cyan">45%</span>
-              </div>
-            </div>
-          </div>
+          <SystemStatus />
         </div>
       )}
     </div>

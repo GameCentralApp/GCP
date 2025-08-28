@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { Save, RefreshCw, Shield, Database, Mail, Bell } from 'lucide-react';
 import clsx from 'clsx';
 import { Settings as SettingsIcon } from 'lucide-react';
+import { api } from '../services/api';
+import toast from 'react-hot-toast';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
+  const [loading, setLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const [settings, setSettings] = useState({
     general: {
       siteName: 'GameHost Control Panel',
@@ -53,9 +57,70 @@ const Settings: React.FC = () => {
     { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
 
-  const handleSave = () => {
-    // Save settings logic here
-    console.log('Saving settings:', settings);
+  React.useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/settings');
+      if (response.data) {
+        setSettings(prevSettings => ({
+          ...prevSettings,
+          ...response.data
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+      toast.error('Failed to load settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      await api.put('/settings', settings);
+      setHasChanges(false);
+      toast.success('Settings saved successfully');
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      toast.error('Failed to save settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = async () => {
+    if (!confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await api.post('/settings/reset');
+      await fetchSettings(); // Reload settings after reset
+      setHasChanges(false);
+      toast.success('Settings reset to defaults');
+    } catch (error) {
+      console.error('Failed to reset settings:', error);
+      toast.error('Failed to reset settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateSetting = (section: string, key: string, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [key]: value
+      }
+    }));
+    setHasChanges(true);
   };
 
   return (
@@ -69,15 +134,18 @@ const Settings: React.FC = () => {
         
         <div className="flex items-center space-x-3">
           <button className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors">
+            onClick={handleReset}
+            disabled={loading}
             <RefreshCw className="h-4 w-4" />
             <span>Reset</span>
           </button>
           <button
             onClick={handleSave}
+            disabled={loading || !hasChanges}
             className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
           >
             <Save className="h-4 w-4" />
-            <span>Save Changes</span>
+            <span>{loading ? 'Saving...' : 'Save Changes'}</span>
           </button>
         </div>
       </div>
@@ -121,10 +189,7 @@ const Settings: React.FC = () => {
                   <input
                     type="text"
                     value={settings.general.siteName}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      general: { ...prev.general, siteName: e.target.value }
-                    }))}
+                    onChange={(e) => updateSetting('general', 'siteName', e.target.value)}
                     className="w-full px-3 py-2 bg-dark-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   />
                 </div>
@@ -136,10 +201,7 @@ const Settings: React.FC = () => {
                   <input
                     type="number"
                     value={settings.general.maxServersPerUser}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      general: { ...prev.general, maxServersPerUser: parseInt(e.target.value) }
-                    }))}
+                    onChange={(e) => updateSetting('general', 'maxServersPerUser', parseInt(e.target.value))}
                     className="w-full px-3 py-2 bg-dark-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   />
                 </div>
@@ -151,10 +213,7 @@ const Settings: React.FC = () => {
                 </label>
                 <textarea
                   value={settings.general.siteDescription}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    general: { ...prev.general, siteDescription: e.target.value }
-                  }))}
+                  onChange={(e) => updateSetting('general', 'siteDescription', e.target.value)}
                   rows={3}
                   className="w-full px-3 py-2 bg-dark-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                 />
@@ -170,10 +229,7 @@ const Settings: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={settings.general.allowRegistration}
-                      onChange={(e) => setSettings(prev => ({
-                        ...prev,
-                        general: { ...prev.general, allowRegistration: e.target.checked }
-                      }))}
+                      onChange={(e) => updateSetting('general', 'allowRegistration', e.target.checked)}
                       className="sr-only"
                     />
                     <div className={clsx(
@@ -197,10 +253,7 @@ const Settings: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={settings.general.maintenanceMode}
-                      onChange={(e) => setSettings(prev => ({
-                        ...prev,
-                        general: { ...prev.general, maintenanceMode: e.target.checked }
-                      }))}
+                      onChange={(e) => updateSetting('general', 'maintenanceMode', e.target.checked)}
                       className="sr-only"
                     />
                     <div className={clsx(
@@ -228,10 +281,7 @@ const Settings: React.FC = () => {
                   <input
                     type="text"
                     value={settings.docker.dockerHost}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      docker: { ...prev.docker, dockerHost: e.target.value }
-                    }))}
+                    onChange={(e) => updateSetting('docker', 'dockerHost', e.target.value)}
                     className="w-full px-3 py-2 bg-dark-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary-500 font-mono"
                   />
                 </div>
@@ -243,10 +293,7 @@ const Settings: React.FC = () => {
                   <input
                     type="text"
                     value={settings.docker.networkName}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      docker: { ...prev.docker, networkName: e.target.value }
-                    }))}
+                    onChange={(e) => updateSetting('docker', 'networkName', e.target.value)}
                     className="w-full px-3 py-2 bg-dark-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   />
                 </div>
@@ -259,10 +306,7 @@ const Settings: React.FC = () => {
                 <input
                   type="text"
                   value={settings.docker.defaultImage}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    docker: { ...prev.docker, defaultImage: e.target.value }
-                  }))}
+                  onChange={(e) => updateSetting('docker', 'defaultImage', e.target.value)}
                   className="w-full px-3 py-2 bg-dark-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary-500 font-mono"
                 />
               </div>
@@ -277,10 +321,7 @@ const Settings: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={settings.docker.autoCleanup}
-                      onChange={(e) => setSettings(prev => ({
-                        ...prev,
-                        docker: { ...prev.docker, autoCleanup: e.target.checked }
-                      }))}
+                      onChange={(e) => updateSetting('docker', 'autoCleanup', e.target.checked)}
                       className="sr-only"
                     />
                     <div className={clsx(
@@ -308,10 +349,7 @@ const Settings: React.FC = () => {
                   <input
                     type="number"
                     value={settings.security.sessionTimeout}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      security: { ...prev.security, sessionTimeout: parseInt(e.target.value) }
-                    }))}
+                    onChange={(e) => updateSetting('security', 'sessionTimeout', parseInt(e.target.value))}
                     className="w-full px-3 py-2 bg-dark-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   />
                 </div>
@@ -323,10 +361,7 @@ const Settings: React.FC = () => {
                   <input
                     type="number"
                     value={settings.security.maxLoginAttempts}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      security: { ...prev.security, maxLoginAttempts: parseInt(e.target.value) }
-                    }))}
+                    onChange={(e) => updateSetting('security', 'maxLoginAttempts', parseInt(e.target.value))}
                     className="w-full px-3 py-2 bg-dark-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   />
                 </div>
@@ -342,10 +377,7 @@ const Settings: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={settings.security.requireTwoFactor}
-                      onChange={(e) => setSettings(prev => ({
-                        ...prev,
-                        security: { ...prev.security, requireTwoFactor: e.target.checked }
-                      }))}
+                      onChange={(e) => updateSetting('security', 'requireTwoFactor', e.target.checked)}
                       className="sr-only"
                     />
                     <div className={clsx(
@@ -369,10 +401,7 @@ const Settings: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={settings.security.allowApiAccess}
-                      onChange={(e) => setSettings(prev => ({
-                        ...prev,
-                        security: { ...prev.security, allowApiAccess: e.target.checked }
-                      }))}
+                      onChange={(e) => updateSetting('security', 'allowApiAccess', e.target.checked)}
                       className="sr-only"
                     />
                     <div className={clsx(
@@ -413,13 +442,7 @@ const Settings: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={enabled}
-                        onChange={(e) => setSettings(prev => ({
-                          ...prev,
-                          notifications: { 
-                            ...prev.notifications, 
-                            [key]: e.target.checked 
-                          }
-                        }))}
+                        onChange={(e) => updateSetting('notifications', key, e.target.checked)}
                         className="sr-only"
                       />
                       <div className={clsx(
