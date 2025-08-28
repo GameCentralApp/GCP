@@ -33,6 +33,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   next();
+}
+)
 // Health check
 app.get('/health', (req: Request, res: Response) => {
   log('Health check requested');
