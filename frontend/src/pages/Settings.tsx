@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Save, RefreshCw, Shield, Database, Mail, Bell } from 'lucide-react';
 import clsx from 'clsx';
+import { Settings as SettingsIcon } from 'lucide-react';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
@@ -45,7 +46,7 @@ const Settings: React.FC = () => {
   });
 
   const tabs = [
-    { id: 'general', label: 'General', icon: Settings },
+    { id: 'general', label: 'General', icon: SettingsIcon },
     { id: 'docker', label: 'Docker', icon: Database },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'email', label: 'Email', icon: Mail },
@@ -89,19 +90,20 @@ const Settings: React.FC = () => {
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
-                <button
+                <div
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={clsx(
+                    'cursor-pointer',
                     'flex items-center space-x-2 py-4 border-b-2 font-medium text-sm transition-colors',
                     activeTab === tab.id
-                      ? 'border-primary-500 text-primary-500'
+                      ? 'border-neon-cyan text-neon-cyan'
                       : 'border-transparent text-gray-400 hover:text-gray-300'
                   )}
                 >
                   <Icon className="h-4 w-4" />
                   <span>{tab.label}</span>
-                </button>
+                </div>
               );
             })}
           </nav>
@@ -159,36 +161,58 @@ const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-dark-900 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-900/50 rounded-lg border border-gray-700/30">
                   <div>
                     <h4 className="font-medium text-white">Allow User Registration</h4>
                     <p className="text-sm text-gray-400">Allow new users to create accounts</p>
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.general.allowRegistration}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      general: { ...prev.general, allowRegistration: e.target.checked }
-                    }))}
-                    className="rounded"
-                  />
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.general.allowRegistration}
+                      onChange={(e) => setSettings(prev => ({
+                        ...prev,
+                        general: { ...prev.general, allowRegistration: e.target.checked }
+                      }))}
+                      className="sr-only"
+                    />
+                    <div className={clsx(
+                      'w-11 h-6 rounded-full transition-colors',
+                      settings.general.allowRegistration ? 'bg-neon-cyan' : 'bg-gray-600'
+                    )}>
+                      <div className={clsx(
+                        'w-5 h-5 bg-white rounded-full shadow-md transform transition-transform mt-0.5',
+                        settings.general.allowRegistration ? 'translate-x-5' : 'translate-x-0.5'
+                      )}></div>
+                    </div>
+                  </label>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-dark-900 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-900/50 rounded-lg border border-gray-700/30">
                   <div>
                     <h4 className="font-medium text-white">Maintenance Mode</h4>
                     <p className="text-sm text-gray-400">Disable access for all users except admins</p>
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.general.maintenanceMode}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      general: { ...prev.general, maintenanceMode: e.target.checked }
-                    }))}
-                    className="rounded"
-                  />
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.general.maintenanceMode}
+                      onChange={(e) => setSettings(prev => ({
+                        ...prev,
+                        general: { ...prev.general, maintenanceMode: e.target.checked }
+                      }))}
+                      className="sr-only"
+                    />
+                    <div className={clsx(
+                      'w-11 h-6 rounded-full transition-colors',
+                      settings.general.maintenanceMode ? 'bg-neon-pink' : 'bg-gray-600'
+                    )}>
+                      <div className={clsx(
+                        'w-5 h-5 bg-white rounded-full shadow-md transform transition-transform mt-0.5',
+                        settings.general.maintenanceMode ? 'translate-x-5' : 'translate-x-0.5'
+                      )}></div>
+                    </div>
+                  </label>
                 </div>
               </div>
             </div>
@@ -244,20 +268,31 @@ const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-dark-900 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-900/50 rounded-lg border border-gray-700/30">
                   <div>
                     <h4 className="font-medium text-white">Auto Cleanup</h4>
                     <p className="text-sm text-gray-400">Automatically remove unused containers and images</p>
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.docker.autoCleanup}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      docker: { ...prev.docker, autoCleanup: e.target.checked }
-                    }))}
-                    className="rounded"
-                  />
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.docker.autoCleanup}
+                      onChange={(e) => setSettings(prev => ({
+                        ...prev,
+                        docker: { ...prev.docker, autoCleanup: e.target.checked }
+                      }))}
+                      className="sr-only"
+                    />
+                    <div className={clsx(
+                      'w-11 h-6 rounded-full transition-colors',
+                      settings.docker.autoCleanup ? 'bg-neon-green' : 'bg-gray-600'
+                    )}>
+                      <div className={clsx(
+                        'w-5 h-5 bg-white rounded-full shadow-md transform transition-transform mt-0.5',
+                        settings.docker.autoCleanup ? 'translate-x-5' : 'translate-x-0.5'
+                      )}></div>
+                    </div>
+                  </label>
                 </div>
               </div>
             </div>
@@ -298,36 +333,58 @@ const Settings: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-dark-900 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-900/50 rounded-lg border border-gray-700/30">
                   <div>
                     <h4 className="font-medium text-white">Require Two-Factor Authentication</h4>
                     <p className="text-sm text-gray-400">Force all users to enable 2FA</p>
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.security.requireTwoFactor}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      security: { ...prev.security, requireTwoFactor: e.target.checked }
-                    }))}
-                    className="rounded"
-                  />
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.security.requireTwoFactor}
+                      onChange={(e) => setSettings(prev => ({
+                        ...prev,
+                        security: { ...prev.security, requireTwoFactor: e.target.checked }
+                      }))}
+                      className="sr-only"
+                    />
+                    <div className={clsx(
+                      'w-11 h-6 rounded-full transition-colors',
+                      settings.security.requireTwoFactor ? 'bg-neon-purple' : 'bg-gray-600'
+                    )}>
+                      <div className={clsx(
+                        'w-5 h-5 bg-white rounded-full shadow-md transform transition-transform mt-0.5',
+                        settings.security.requireTwoFactor ? 'translate-x-5' : 'translate-x-0.5'
+                      )}></div>
+                    </div>
+                  </label>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-dark-900 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-dark-900/50 rounded-lg border border-gray-700/30">
                   <div>
                     <h4 className="font-medium text-white">Allow API Access</h4>
                     <p className="text-sm text-gray-400">Enable REST API for external integrations</p>
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.security.allowApiAccess}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      security: { ...prev.security, allowApiAccess: e.target.checked }
-                    }))}
-                    className="rounded"
-                  />
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.security.allowApiAccess}
+                      onChange={(e) => setSettings(prev => ({
+                        ...prev,
+                        security: { ...prev.security, allowApiAccess: e.target.checked }
+                      }))}
+                      className="sr-only"
+                    />
+                    <div className={clsx(
+                      'w-11 h-6 rounded-full transition-colors',
+                      settings.security.allowApiAccess ? 'bg-neon-cyan' : 'bg-gray-600'
+                    )}>
+                      <div className={clsx(
+                        'w-5 h-5 bg-white rounded-full shadow-md transform transition-transform mt-0.5',
+                        settings.security.allowApiAccess ? 'translate-x-5' : 'translate-x-0.5'
+                      )}></div>
+                    </div>
+                  </label>
                 </div>
               </div>
             </div>
@@ -339,7 +396,7 @@ const Settings: React.FC = () => {
               
               <div className="space-y-4">
                 {Object.entries(settings.notifications).map(([key, enabled]) => (
-                  <div key={key} className="flex items-center justify-between p-4 bg-dark-900 rounded-lg">
+                  <div key={key} className="flex items-center justify-between p-4 bg-dark-900/50 rounded-lg border border-gray-700/30">
                     <div>
                       <h4 className="font-medium text-white capitalize">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
@@ -352,18 +409,29 @@ const Settings: React.FC = () => {
                         {key === 'backupComplete' && 'Notify when backups complete'}
                       </p>
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={enabled}
-                      onChange={(e) => setSettings(prev => ({
-                        ...prev,
-                        notifications: { 
-                          ...prev.notifications, 
-                          [key]: e.target.checked 
-                        }
-                      }))}
-                      className="rounded"
-                    />
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={enabled}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          notifications: { 
+                            ...prev.notifications, 
+                            [key]: e.target.checked 
+                          }
+                        }))}
+                        className="sr-only"
+                      />
+                      <div className={clsx(
+                        'w-11 h-6 rounded-full transition-colors',
+                        enabled ? 'bg-neon-green' : 'bg-gray-600'
+                      )}>
+                        <div className={clsx(
+                          'w-5 h-5 bg-white rounded-full shadow-md transform transition-transform mt-0.5',
+                          enabled ? 'translate-x-5' : 'translate-x-0.5'
+                        )}></div>
+                      </div>
+                    </label>
                   </div>
                 ))}
               </div>
