@@ -8,6 +8,12 @@ import { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import { authenticateToken, requireAdmin } from './middleware/auth';
 
+// Simple logging function
+const log = (message: string) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${message}`);
+};
+
 // Load environment variables
 dotenv.config();
 
