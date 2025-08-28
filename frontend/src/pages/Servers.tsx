@@ -99,11 +99,11 @@ const Servers: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <button className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-dark-800/50 hover:bg-dark-700 border border-gray-700 hover:border-gray-600 rounded-lg transition-colors text-gray-300 hover:text-white">
             <RefreshCw className="h-4 w-4" />
             <span>Refresh</span>
           </button>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-neon-cyan/20 hover:bg-neon-cyan hover:text-dark-950 text-neon-cyan border border-neon-cyan/30 hover:border-neon-cyan rounded-lg transition-colors">
             <Plus className="h-4 w-4" />
             <span>Create Server</span>
           </button>
@@ -128,7 +128,7 @@ const Servers: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-dark-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary-500"
+            className="px-3 py-2 bg-dark-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-neon-cyan"
           >
             <option value="all">All Status</option>
             <option value="online">Online</option>
@@ -156,7 +156,7 @@ const Servers: React.FC = () => {
       {filteredServers.length === 0 && (
         <div className="text-center py-12">
           <div className="h-16 w-16 text-gray-500 mx-auto mb-4 flex items-center justify-center">
-            <Server className="h-16 w-16" />
+            <Server className="h-16 w-16 text-gray-600" />
           </div>
           <h3 className="text-xl font-medium text-white mb-2">No servers found</h3>
           <p className="text-gray-400 mb-6">
@@ -165,7 +165,7 @@ const Servers: React.FC = () => {
               : 'Create your first game server to get started'
             }
           </p>
-          <button className="flex items-center space-x-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors mx-auto">
+          <button className="flex items-center space-x-2 px-6 py-3 bg-neon-cyan/20 hover:bg-neon-cyan hover:text-dark-950 text-neon-cyan border border-neon-cyan/30 hover:border-neon-cyan rounded-lg transition-colors mx-auto">
             <Plus className="h-4 w-4" />
             <span>Create Server</span>
           </button>

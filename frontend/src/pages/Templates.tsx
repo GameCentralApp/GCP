@@ -139,7 +139,7 @@ const Templates: React.FC = () => {
               selectedCategory === category
                 ? 'bg-primary-600 text-white'
                 : 'bg-dark-800 text-gray-300 hover:bg-dark-700'
-            )}
+            className="px-3 py-2 bg-dark-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-neon-cyan"
           >
             {category}
           </button>
@@ -212,7 +212,7 @@ const Templates: React.FC = () => {
                 </div>
                 <button
                   onClick={() => handleUseTemplate(template.id)}
-                  className="px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors text-sm font-medium"
+                  className="px-4 py-2 bg-neon-cyan/20 hover:bg-neon-cyan hover:text-dark-950 text-neon-cyan border border-neon-cyan/30 hover:border-neon-cyan rounded-lg transition-colors text-sm font-medium"
                 >
                   Use Template
                 </button>
